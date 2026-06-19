@@ -551,63 +551,107 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 </table>
 <div class="callout"><span class="tag">Open sub-decision</span>Whether the App commits each <code>/vouch</code> to the PR branch as it happens (visible, immediate) or batches them into the merge commit (no mid-review churn). Both keep records in-repo in <code>.vid/reviews.jsonl</code> and leave source untouched.</div>
 
-<h3>The coverage matrix — required vs present <span style="font-size:.72em;color:var(--muted);font-weight:400">— proposed; one shared picture across CLI, editor &amp; web</span></h3>
-<p>Trust requirements are points on a 2D grid — <strong>human</strong> seniority × <strong>machine</strong> capability (AI models and 3rd-party tools on one ranked ladder, §10). That makes "what's required vs. what a unit actually has" drawable as the <em>same picture</em> everywhere: a unit <strong>passes</strong> iff its strongest <code>(human, machine)</code> sits in the shaded region at-or-above an <code>accept</code> point. Every surface renders the one <code>vid.json</code> — each unit already carries its <code>missing</code> shortfall (the absent vouches), so the matrix and its drill-downs are pure presentation.</p>
+<h3>The coverage matrix — the signature view <span style="font-size:.72em;color:var(--muted);font-weight:400">— greenfield; designed to each medium's ceiling, not the lowest common denominator</span></h3>
+<p>The 2-axis policy makes coverage a <em>spatial</em> object, so the matrix is not a report appendix — it is the product's signature view, the way a flame graph <em>is</em> a profiler. Every requirement is a <strong>region</strong> (the <code>accept</code> rows trace a frontier — an <code>AND</code> is a corner, an <code>OR</code> is an L); every unit is a <strong>point</strong> at its strongest <code>(human, machine)</code>; coverage is simply the <strong>mass that sits inside the frontier</strong>, and a gap is the distance a point must travel to get there. Build each surface to the best its medium allows; they share one source of truth (<code>vid.json</code> + the <code>trust.toml</code> axes), never one lowest-common-denominator rendering.</p>
+
+<figure class="mock-fig">
+<div style="display:flex;gap:26px;flex-wrap:wrap;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 18px">
+  <div style="text-align:center">
+    <div style="font:600 12px var(--mono,monospace);color:var(--muted);margin-bottom:4px">src/billing/** — <span style="color:var(--ink)">human=principal AND machine=opus</span> → a corner</div>
+    <svg viewBox="0 0 300 262" width="300" height="262" font-family="ui-monospace,monospace" role="img" aria-label="Billing coverage matrix: pass region is the top-right corner">
+      <rect x="230" y="12" width="56" height="56" fill="#5fb86a" fill-opacity="0.18"/>
+      <g stroke="#e6e8ec" stroke-width="1">
+        <line x1="62" y1="12" x2="286" y2="12"/><line x1="62" y1="68" x2="286" y2="68"/>
+        <line x1="62" y1="124" x2="286" y2="124"/><line x1="62" y1="180" x2="286" y2="180"/>
+        <line x1="62" y1="236" x2="286" y2="236"/>
+        <line x1="62" y1="12" x2="62" y2="236"/><line x1="118" y1="12" x2="118" y2="236"/>
+        <line x1="174" y1="12" x2="174" y2="236"/><line x1="230" y1="12" x2="230" y2="236"/>
+        <line x1="286" y1="12" x2="286" y2="236"/>
+      </g>
+      <polyline points="230,68 230,12 286,12 286,68 230,68" fill="none" stroke="#2f9e44" stroke-width="2.5"/>
+      <text x="258" y="60" text-anchor="middle" font-size="9" fill="#2f9e44">the&#160;bar</text>
+      <g>
+        <circle cx="250" cy="34" r="4" fill="#2f9e44"/><circle cx="266" cy="35" r="4" fill="#2f9e44"/><circle cx="258" cy="48" r="4" fill="#2f9e44"/>
+        <circle cx="84" cy="148" r="4" fill="#d2873c"/><circle cx="96" cy="156" r="4" fill="#d2873c"/>
+        <circle cx="90" cy="208" r="4" fill="#e06c75"/>
+        <circle cx="197" cy="204" r="4" fill="#e06c75"/><circle cx="208" cy="212" r="4" fill="#e06c75"/>
+        <circle cx="258" cy="96" r="4" fill="#d2873c"/>
+      </g>
+      <g fill="#5c6066" font-size="10">
+        <text x="56" y="43" text-anchor="end">principal</text><text x="56" y="99" text-anchor="end">senior</text>
+        <text x="56" y="155" text-anchor="end">junior</text><text x="56" y="211" text-anchor="end">intern</text>
+        <text x="90" y="251" text-anchor="middle">crab</text><text x="146" y="251" text-anchor="middle">cubic</text>
+        <text x="202" y="251" text-anchor="middle">sonnet</text><text x="258" y="251" text-anchor="middle">opus</text>
+      </g>
+    </svg>
+  </div>
+  <div style="text-align:center">
+    <div style="font:600 12px var(--mono,monospace);color:var(--muted);margin-bottom:4px">src/dashboards/** — <span style="color:var(--ink)">human=senior OR machine=opus</span> → an L</div>
+    <svg viewBox="0 0 300 262" width="300" height="262" font-family="ui-monospace,monospace" role="img" aria-label="Dashboards coverage matrix: pass region is an L (top rows or right column)">
+      <rect x="62" y="12" width="224" height="112" fill="#5fb86a" fill-opacity="0.18"/>
+      <rect x="230" y="124" width="56" height="112" fill="#5fb86a" fill-opacity="0.18"/>
+      <g stroke="#e6e8ec" stroke-width="1">
+        <line x1="62" y1="12" x2="286" y2="12"/><line x1="62" y1="68" x2="286" y2="68"/>
+        <line x1="62" y1="124" x2="286" y2="124"/><line x1="62" y1="180" x2="286" y2="180"/>
+        <line x1="62" y1="236" x2="286" y2="236"/>
+        <line x1="62" y1="12" x2="62" y2="236"/><line x1="118" y1="12" x2="118" y2="236"/>
+        <line x1="174" y1="12" x2="174" y2="236"/><line x1="230" y1="12" x2="230" y2="236"/>
+        <line x1="286" y1="12" x2="286" y2="236"/>
+      </g>
+      <polyline points="62,124 230,124 230,236" fill="none" stroke="#2f9e44" stroke-width="2.5"/>
+      <g>
+        <circle cx="202" cy="34" r="4" fill="#2f9e44"/><circle cx="90" cy="96" r="4" fill="#2f9e44"/>
+        <circle cx="258" cy="208" r="4" fill="#2f9e44"/><circle cx="150" cy="40" r="4" fill="#2f9e44"/>
+        <circle cx="86" cy="150" r="4" fill="#d2873c"/><circle cx="150" cy="208" r="4" fill="#e06c75"/>
+        <circle cx="200" cy="152" r="4" fill="#d2873c"/>
+      </g>
+      <g fill="#5c6066" font-size="10">
+        <text x="56" y="43" text-anchor="end">principal</text><text x="56" y="99" text-anchor="end">senior</text>
+        <text x="56" y="155" text-anchor="end">junior</text><text x="56" y="211" text-anchor="end">intern</text>
+        <text x="90" y="251" text-anchor="middle">crab</text><text x="146" y="251" text-anchor="middle">cubic</text>
+        <text x="202" y="251" text-anchor="middle">sonnet</text><text x="258" y="251" text-anchor="middle">opus</text>
+      </g>
+    </svg>
+  </div>
+</div>
+<figcaption><strong>Web (<code>vici</code>) — the reference rendering.</strong> Units are points at their strongest <code>(human, machine)</code>; the shaded region is "passes," its frontier drawn from the <code>accept</code> rows — so the policy's <em>shape</em> is literally visible (<code>AND</code> = a corner, <code>OR</code> = an L). <span style="color:#2f9e44">green</span> = in the region, <span style="color:#d2873c">amber</span>/<span style="color:#e06c75">red</span> = below the bar (hue = how far). Live: hover a point → unit + its gap; click a cell → its units &amp; vouch history; a <strong>time-scrubber</strong> replays the matrix commit-by-commit (watch the below-bar mass burn down); per-PR overlays the changed units; an org view is small-multiples of this grid per repo, plus an embeddable matrix badge.</figcaption>
+</figure>
 
 <figure class="mock-fig">
 <div class="vidmock term">
-  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid report --matrix</span></div>
-<pre><span class="p">❯</span> <span class="cmd">vid report --matrix --scope "src/billing/**"</span>
-  <span class="dim">src/billing/**</span>   <span class="rev">▓ pass</span>   <span class="rev">●</span> required   <span class="rev">3</span><span class="dim">/8 units pass</span>
-
-  <span class="key">human</span>
-  principal │   ·      ·      ·     <span class="rev">▓●</span>      <span class="dim">● the bar: principal × opus</span>
-  senior    │   ·      ·      ·      ·
-  junior    │  <span class="unrev">◍2</span>      ·      ·      ·       <span class="dim">◍N  N units sit here…</span>
-  intern    │  <span class="unrev">◍1</span>      ·     <span class="unrev">◍2</span>      ·       <span class="dim">    …below the bar</span>
-            └─────────────────────────────  <span class="key">machine →</span>
-              crab   cubic   sonn   opus
-
-  <span class="stale">▲ 5 below the bar</span>
-       <span class="unit">charge()</span>  <span class="dim">needs</span> human ≥ <span class="key">principal</span> <span class="dim">(have intern)</span> + machine ≥ <span class="key">opus</span> <span class="dim">(have —)</span></pre>
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid matrix — interactive</span></div>
+<pre><span class="dim">vid matrix · src/billing/**</span>          <span class="key">lens human⋈machine</span>   <span class="dim">[tab] scope  [/] filter  [t] time</span>
+┌─ <span class="key">human</span> ───────────────────────────────────────────────────────────┐
+│ principal    ·      ·      ·    <span class="rev">◆3</span>          <span class="dim">◆ pass · size = units</span>      │
+│ senior       ·      ·      ·    <span class="stale">▴1</span>                                  │
+│ junior      <span class="stale">▴2</span>      ·      ·      ·          <span class="dim">▴ below the bar</span>          │
+│ intern   <span class="rev">▸</span><span class="unrev">▴1</span>      ·     <span class="unrev">▴2</span>      ·          <span class="rev">▸</span> <span class="dim">cursor</span>                 │
+└──────────── crab   cubic   sonn   opus ─── <span class="key">machine →</span> ───────────┘
+ <span class="dim">cell</span> intern×crab · 1 unit                         <span class="rev">3</span><span class="dim">/8 pass ·</span> <span class="rev">▁▂▃▄▅</span> <span class="dim">+3/wk</span>
+ <span class="rev">▸</span> <span class="unit">refund()</span>  <span class="dim">needs</span> human ≥ <span class="key">principal</span> + machine ≥ <span class="key">opus</span>   <span class="dim">[⏎] vouch  [o] open</span></pre>
 </div>
-<figcaption><strong>CLI</strong> (<code>vid report --matrix</code>): an ASCII grid per scope — the pass region shaded, the required point ●, units bucketed into cells, and the same per-unit <em>shortfall</em> the textual report already prints. <code>--scope</code> picks one path; bare prints a small-multiples grid.</figcaption>
+<figcaption><strong>CLI — an interactive TUI is the hero, not static ASCII.</strong> <code>vid matrix</code> opens a navigable grid: arrow keys move the cursor cell-to-cell, the footer shows that cell's units and the exact gap, <kbd>⏎</kbd> vouches in place and the dot animates into the region, <kbd>/</kbd> filters by path, <kbd>t</kbd> scrubs history. Cells are <strong>truecolor heat</strong> (density); on graphics-capable terminals (kitty/iTerm2/Sixel) it renders the SVG above <em>inline</em>; unit rows are <strong>OSC-8 hyperlinks</strong> that open <code>$EDITOR</code> at the unit. Non-TTY / piped / CI degrades to a static truecolor heatmap (then plain ASCII) plus the per-unit shortfall — so <code>vid report --matrix</code> always has something faithful to print.</figcaption>
 </figure>
 
 <figure class="mock-fig">
 <div class="vidmock ide">
-  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">Vidi Vouch · Coverage Matrix — JetBrains tool-window / VS Code webview</span></div>
-<pre>  <span class="key">Coverage Matrix</span>      scope: <span class="unit">src/billing/**</span>  <span class="dim">▾</span>     <span class="dim">lens drives the bar</span>
-
-               crab    cubic   sonnet    opus
-   principal    ·       ·        ·       <span class="rev">●3</span>     <span class="dim">← pass region (shaded)</span>
-   senior       ·       ·        ·        ·
-   junior      <span class="unrev">◍2</span>      ·        ·        ·
-   intern      <span class="unrev">◍1</span>      ·       <span class="unrev">◍2</span>       ·
-
-  <span class="dim">click a cell → the units in it → Gutter Vouch · hover a unit → its gap</span>
-  <span class="key">selected</span>  <span class="unit">charge()</span>   <span class="stale">needs principal + opus</span>   <span class="dim">[ Vouch ⌃⌥V ]</span></pre>
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">editor — matrix linked to code</span></div>
+<pre>  <span class="dim">src/billing/pay.rs</span>
+  88 <span class="rev">◉▸</span> <span style="color:#cf8e6d">fn</span> <span class="unit">charge</span>(amt: i64) -&gt; i64 {     <span class="dim">gutter: a 2-pip "you ↘ vs bar ↗" glyph</span>
+  89 <span class="stale">▰▱</span>     <span class="dim">// caret here → its cell pulses in the panel →</span>
+     ┌─ <span class="key">Coverage Matrix</span> ─ src/billing/** ─────────────┐
+     │            crab   cubic  sonn   opus                │
+     │ principal    ·      ·     ·    <span class="rev">●3</span>   <span class="dim">← drop a unit</span>  │
+     │ senior       ·      ·     ·     ·    <span class="dim">here = vouch</span> │
+     │ junior      <span class="stale">◍2</span>      ·     ·     ·                  │
+     │ intern      <span class="unrev">◍1</span>      ·    <span class="unrev">◍2</span>     ·                  │
+     └────────────────────────────────────────────────────┘
+  <span class="key">charge()</span> <span class="stale">needs principal + opus</span>   <span class="dim">[ Vouch ⌃⌥V ]  suggests: sr@ + opus run</span></pre>
 </div>
-<figcaption><strong>IDE</strong>: the matrix as an interactive panel (JetBrains tool-window / opt-in VS Code webview, alongside the coverage tree). Cells are clickable → the units sitting there → the standard <em>Gutter Vouch</em>; a failing unit's gap shows inline. Xcode (commands-only) falls back to the textual shortfall. The editor's at-caret inlay can show a one-cell "you are here / bar is there" mini-glyph.</figcaption>
+<figcaption><strong>IDE — the matrix is spatially linked to the code, not a detached report.</strong> The panel and the editor cross-highlight (caret in a unit → its cell pulses; pick a cell → its units reveal); each unit's gutter carries a tiny <strong>two-pip "you-are-here vs. the bar"</strong> glyph; the scrollbar/minimap is a pass/fail heat-strip down the file; <strong>drag a unit into the region to vouch</strong> (the panel suggests the cheapest reviewer/model that clears the gap), and vouching animates the dot home. JetBrains tool-window and the VS Code webview share this; Xcode (no panel API) falls back to the inline shortfall + <kbd>⌃⌥V</kbd>.</figcaption>
 </figure>
 
-<figure class="mock-fig">
-<div class="vidmock ide">
-  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vici · vidivouch.com — web portal</span></div>
-<pre>  <span class="dim">vici ·</span> <span class="key">VidiVouch/vid</span> <span class="dim">· scope</span> src/billing/** <span class="dim">·</span> <span class="key">◷ HEAD</span> <span class="dim">▾</span>
-
-               crab    cubic   sonnet    opus
-   principal    ░       ░        ░       <span class="rev">██3</span>    <span class="dim">██ darker = more units</span>
-   senior       ░       ░        ░        ░       <span class="dim">░  lighter = fewer</span>
-   junior      <span class="stale">▓2</span>      ░        ░        ░       <span class="dim">cell → unit list + vouches</span>
-   intern      <span class="stale">▓1</span>      ░       <span class="stale">▓2</span>       ░       <span class="dim">drag ◷ → matrix over time</span>
-
-  <span class="rev">3</span><span class="dim">/8 pass ·</span> <span class="stale">5 below the bar</span> <span class="dim">·</span> <span class="key">trend</span> <span class="rev">▁▂▃▄▅</span> <span class="dim">+3 this week · org roll-up across repos</span></pre>
-</div>
-<figcaption><strong>Web</strong> (<code>vici</code>): the richest form — a coverage <em>heatmap</em> (cell shade = unit density), the required frontier outlined, click-through to a cell's units and their vouch history, a time-slider that replays the matrix at past commits (the GitHub-like historical view), and an org roll-up across repos. Per-PR: the changed units plotted with what's missing to merge.</figcaption>
-</figure>
-
-<div class="callout"><span class="tag">One model, three renders</span>The grid is never recomputed per surface: <code>vid.json</code> carries each unit's state plus its <code>missing</code> shortfall (scope → accept options → <code>{axis, required, present}</code> gaps), and the axes come from <code>trust.toml</code>. CLI/IDE/web differ only in fidelity — ASCII, interactive panel, heatmap-over-time — so "what passed vs. what's required" reads identically wherever you look.</div>
+<div class="callout"><span class="tag">One model, rendered to each ceiling</span>All three read the same <code>vid.json</code> (each unit's state + its <code>missing</code> shortfall: scope → <code>accept</code> options → <code>{axis, required, present}</code> gaps) over the <code>trust.toml</code> axes. They are not the same picture down-rezzed — they are the <em>best</em> picture each medium can draw: a live SVG with a time-scrubber on the web, a navigable truecolor TUI (with inline graphics) in the terminal, and a code-linked panel with drag-to-vouch in the editor.</div>
 
 <h2 id="report">13. The un-reviewed report</h2>
 <div class="callout"><span class="tag">Decision #3 — settled</span><strong>Stratify by invariance grade (code/structural/opaque) and lane</strong> — the honesty floor — then read through configurable named lenses (§10). Code-grade <em>human-lane</em> coverage under the <code>primary</code> lens is the headline; prose/markup/opaque and the AI/blended lenses are separate, distinctly-labeled axes that can never pad the human number.</div>
