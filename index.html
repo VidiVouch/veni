@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vidi Vouch · proof of human code review</title>
+<meta name="description" content="A code-review provenance CLI. Record which units of code a human actually reviewed, surviving refactors and resisting forgery, then report what shipped un-reviewed by a human.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#fbfbfc">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vidi Vouch · proof of human code review">
+<meta property="og:description" content="Review provenance in your editor; the un-reviewed report on every pull request.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='none'%20stroke='%231d1d1f'%20stroke-width='3'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='3.5'%20fill='%231d1d1f'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbfbfc; --ink:#1d1d1f; --muted:#5c6066; --faint:#8a8f98; --line:#e6e8ec; --code:#f6f7f9;
+    --rev:#5fb86a; --rev-dot:#5fb86a; --good:#2f9e44; --stale:#d2873c; --unrev:#e06c75; --partial:#c2b54a; --orphan:#71757e;
+    --ed-bg:#1e1f22; --ed-ln:#4b5059; --ed-fg:#bcbec4; --ed-kw:#cf8e6d; --ed-fn:#56a8f5;
+    --ed-str:#6aab73; --ed-com:#7a7e85; --ed-dim:#868a91; --ed-edge:#393b40;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  a{color:inherit;text-decoration:none}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);margin:0 0 16px}
+
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:24px 0}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--mono);font-weight:500}
+  .brand svg{width:29px;color:var(--ink)}
+  .nav{font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;gap:22px;align-items:center}
+  .nav .ghost{padding:7px 14px;border:1px solid var(--line);border-radius:7px;color:var(--ink)}
+
+  .hero{text-align:center;padding:44px 0 30px}
+  h1{font-family:var(--mono);font-weight:500;font-size:42px;line-height:1.12;letter-spacing:-.02em;margin:0}
+  h1 .g{color:var(--good)}
+  .lede{max-width:56ch;margin:20px auto 0;color:var(--muted);font-size:16.5px}
+  .lede b{color:var(--ink);font-weight:600}
+  .cta{margin:30px 0 0;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+  .btn{padding:11px 18px;border-radius:8px}
+  .btn.solid{background:var(--ink);color:#fff}
+  .btn.line{border:1px solid var(--line);color:var(--ink)}
+  .install{margin:18px 0 0;font-family:var(--mono);font-size:13px;color:var(--faint)}
+  .install code{background:var(--code);border:1px solid var(--line);border-radius:6px;padding:3px 8px;color:var(--ink)}
+
+  /* IDE window */
+  .ide{position:relative;margin:42px 0 0;border-radius:12px;overflow:hidden;background:var(--ed-bg);
+    border:1px solid #15161a;box-shadow:0 40px 90px -36px rgba(15,18,30,.55);font-family:var(--mono)}
+  .tbar{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#2b2d30;border-bottom:1px solid #15161a;color:var(--ed-dim);font-size:12.5px}
+  .tbar .tl{display:flex;gap:7px}.tbar .tl i{width:11px;height:11px;border-radius:50%;display:block}
+  .tbar .file{color:#cfd2d8}.tbar .file b{color:var(--ed-fg);font-weight:500}
+  .tbar .spacer{flex:1}
+  .vouch-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border:1px solid #3a5a7d;border-radius:6px;color:#9cc7f5;font-size:11.5px;background:#23354a}
+
+  .pane{display:grid;grid-template-columns:236px 1fr}
+  .side{background:#1e1f22;border-right:1px solid var(--ed-edge);padding:14px 12px;font-size:12px;color:var(--ed-fg)}
+  .side .hd{display:flex;justify-content:space-between;color:var(--ed-dim);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px}
+  .side .pct{color:var(--rev)}
+  .minibar{height:6px;border-radius:4px;background:#33363b;overflow:hidden;display:flex;margin-bottom:16px}
+  .minibar span{display:block;height:100%}
+  .tree{list-style:none;margin:0;padding:0;line-height:2.1}
+  .tree .row{display:flex;align-items:center;gap:8px;white-space:nowrap}
+  .tree .dir{color:#cfd2d8}
+  .tree .child{padding-left:18px;color:var(--ed-dim)}
+  .tree .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .tree .ring{box-shadow:inset 0 0 0 1.4px var(--unrev)}
+  .tree .ct{margin-left:auto;color:var(--ed-dim)}
+  .tree .st{font-size:9.5px;letter-spacing:.03em}
+  .caret{color:var(--ed-dim);width:9px;display:inline-block}
+
+  .ed{position:relative;padding:8px 0 18px;overflow:hidden}
+  .codelens{display:flex;gap:16px;align-items:center;padding:4px 0 4px 58px;color:#7a7e85;font-size:11.5px;font-style:italic}
+  .codelens .act{color:#6aab73;font-style:normal}
+  .codelens .warn{color:var(--stale);font-style:normal}
+  .ln{display:grid;grid-template-columns:44px 14px 1fr;align-items:center;min-height:24px;font-size:13px}
+  .ln .num{color:var(--ed-ln);text-align:right;padding-right:11px;font-size:11.5px}
+  .ln .g{width:4px;height:100%;border-radius:2px;justify-self:center}
+  .ln .code{color:var(--ed-fg);white-space:pre}
+  .ln.cur{background:#26282e}
+  .kw{color:var(--ed-kw)}.fn{color:var(--ed-fn)}.com{color:var(--ed-com)}.pn{color:#c0c5ce}
+
+  .pop{position:absolute;right:34px;top:92px;width:298px;background:#2b2d30;border:1px solid #4a4d52;border-radius:10px;
+    box-shadow:0 22px 50px -16px rgba(0,0,0,.6);padding:14px 15px;font-size:12px;color:var(--ed-fg);z-index:5}
+  .pop .ttl{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .pop .ttl b{font-weight:600;color:#e9ebef}
+  .pop .badge{display:inline-flex;align-items:center;gap:6px;color:var(--stale);font-size:11px}
+  .pop .badge i{width:8px;height:8px;border-radius:50%;background:var(--stale)}
+  .pop dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:5px 12px;color:var(--ed-dim)}
+  .pop dl b{color:#cfd2d8;font-weight:400}
+  .pop .chg{margin:11px 0 12px;padding:8px 10px;background:#332a20;border-radius:7px;color:#e6c39a;font-size:11px}
+  .pop .btns{display:flex;gap:8px}
+  .pop .btns a{flex:1;text-align:center;padding:7px 0;border-radius:6px;font-size:11px}
+  .pop .primary{background:#3a7d3a;color:#eafaea}
+  .pop .ghost2{border:1px solid #4a4d52;color:#bcbec4}
+  .pop:after{content:"";position:absolute;left:-7px;top:30px;width:12px;height:12px;background:#2b2d30;border-left:1px solid #4a4d52;border-bottom:1px solid #4a4d52;transform:rotate(45deg)}
+
+  /* report section */
+  .report-sec{padding:96px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  .report-sec h2{font-family:var(--mono);font-weight:500;font-size:30px;line-height:1.16;letter-spacing:-.02em;margin:0}
+  .report-sec .sec-lede{margin:18px 0 0;color:var(--muted);font-size:15.5px;max-width:40ch}
+  .report-sec .sec-lede b{color:var(--ink);font-weight:600}
+  .report{border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 24px 60px -30px rgba(20,24,40,.26);font-family:var(--mono);background:#fff}
+  .report .cap{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--line);background:var(--code);font-size:12.5px;color:var(--muted)}
+  .report .cap .dotrow{display:flex;gap:6px;margin-right:4px}
+  .report .cap i{width:10px;height:10px;border-radius:50%;display:block}
+  .report .body{padding:18px 18px 20px;font-size:13px}
+  .meta{display:flex;justify-content:space-between;color:var(--faint);font-size:12px;margin-bottom:14px}
+  .bar{height:9px;border-radius:5px;background:var(--code);overflow:hidden;display:flex;margin:2px 0 16px}
+  .bar span{display:block;height:100%}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-bottom:16px}
+  .legend .k{display:inline-flex;align-items:center;gap:7px}
+  .legend .d{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .legend .ring{box-shadow:inset 0 0 0 1.5px var(--unrev)}
+  ul.units{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+  ul.units li{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:baseline;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .tag{font-size:10.5px;letter-spacing:.04em;padding:3px 7px;border-radius:5px;font-weight:500;white-space:nowrap;text-align:center}
+  .tag.stale{color:#7a4d12;background:#f6e9d6}
+  .tag.unrev{color:#8a2336;background:#f8dee3}
+  .path{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .path .fnm{color:var(--muted)}
+  .note{color:var(--faint);font-size:11.5px;text-align:right;white-space:nowrap}
+  .verdict{margin:16px 0 0;padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--unrev);border-radius:9px;background:#fdf6f7;font-size:13.5px;color:var(--ink)}
+  .verdict b{color:var(--unrev)}
+  .gate{margin-top:13px;display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}
+  .pass{color:var(--good);border:1px solid #cdeccd;background:#f1faf2;border-radius:5px;padding:2px 8px;font-weight:500}
+
+  .strip{margin-top:88px;padding:0 0 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:34px;text-align:center}
+  .strip h3{font-family:var(--mono);font-weight:500;font-size:14.5px;margin:0 0 7px}
+  .strip p{margin:0;color:var(--muted);font-size:13.5px}
+  .strip code{font-family:var(--mono);font-size:12.5px;color:var(--ink)}
+  .kbd{font-family:var(--mono);background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:12px;color:var(--ink)}
+
+  footer{margin-top:64px;border-top:1px solid var(--line);padding:26px 0 44px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--faint)}
+  footer b{color:var(--muted);font-weight:500;letter-spacing:.2em}
+
+  @media(max-width:860px){
+    .pane{grid-template-columns:1fr}.side{display:none}.pop{display:none}
+    h1{font-size:32px}
+    .report-sec{grid-template-columns:1fr;gap:30px;padding-top:64px}
+    .strip{grid-template-columns:1fr;gap:22px;margin-top:56px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <span class="brand">
+      <svg viewBox="0 0 242 120" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M42 30 L62 96 L82 30"/><path d="M160 30 L160 96"/><path d="M160 30 C214 30 214 96 160 96"/></g>
+        <path d="M121 74 L121 96" stroke="currentColor" stroke-width="20" stroke-linecap="round"/>
+        <circle cx="121" cy="40" r="16" stroke="currentColor" stroke-width="8"/><circle cx="124.5" cy="43" r="6" fill="currentColor"/>
+      </svg>
+      Vidi&nbsp;Vouch
+    </span>
+    <nav class="nav"><a class="ghost" href="https://github.com/VidiVouch/vidi">GitHub</a></nav>
+  </header>
+
+  <section class="hero">
+    <p class="eyebrow">Code-review provenance · CLI</p>
+    <h1>Review provenance,<br>right in the <span class="g">gutter</span>.</h1>
+    <p class="lede">Vidi Vouch records which units of code a human actually reviewed.
+      <b>Vouch with one gesture</b> where you already work, see who reviewed what, and watch a vouch turn
+      <b>stale</b> the moment the code drifts. No diagnostics list, no source edits.</p>
+    <div class="cta">
+      <a class="btn solid" href="#">Read the design</a>
+      <a class="btn line" href="https://github.com/VidiVouch/vidi">GitHub</a>
+    </div>
+    <p class="install"><code>npm i -g @vidivouch/vid</code> · <code>cargo install vid</code> · <code>brew install vidivouch/tap/vid</code></p>
+  </section>
+
+  <div class="ide">
+    <div class="tbar">
+      <span class="tl"><i style="background:#ec6a5e"></i><i style="background:#f4bf4f"></i><i style="background:#61c554"></i></span>
+      <span class="file">vid &nbsp;›&nbsp; src/lang/python/<b>scope.rs</b></span>
+      <span class="spacer"></span>
+      <span class="vouch-pill">✓ Vouch&nbsp; <span style="color:#6b7785">⌃⌥V</span></span>
+    </div>
+
+    <div class="pane">
+      <aside class="side">
+        <div class="hd"><span>Coverage · human</span><span class="pct">31%</span></div>
+        <div class="minibar"><span style="width:31%;background:var(--rev)"></span><span style="width:11%;background:var(--stale)"></span><span style="flex:1;background:#33363b"></span></div>
+        <ul class="tree">
+          <li class="row dir"><span class="caret">▾</span>src/core<span class="ct" style="color:var(--rev)">3/5</span></li>
+          <li class="row child"><span class="dot" style="background:var(--rev)"></span>NodeTree::children</li>
+          <li class="row child"><span class="dot" style="background:var(--stale)"></span>alpha_normalize <span class="st" style="color:var(--stale)">STALE</span></li>
+          <li class="row child"><span class="dot ring"></span>severity_bucket</li>
+          <li class="row dir"><span class="caret">▾</span>src/lang/python<span class="ct" style="color:var(--stale)">1/4</span></li>
+          <li class="row child"><span class="dot" style="background:var(--stale)"></span>resolve_bindings <span class="st" style="color:var(--stale)">STALE</span></li>
+          <li class="row child"><span class="dot" style="background:var(--partial)"></span>PythonProfile <span class="st" style="color:var(--partial)">2/3</span></li>
+          <li class="row dir"><span class="caret">▸</span>src/lang/rust<span class="ct" style="color:var(--unrev)">0/6</span></li>
+        </ul>
+      </aside>
+
+      <div class="ed">
+        <div class="codelens"><span class="act">✓ Vouch</span><span class="warn">◷ reviewed by tom · now STALE · alpha_normalize drifted</span></div>
+        <div class="ln"><span class="num">88</span><span class="g" style="background:var(--stale)"></span><span class="code"><span class="kw">pub fn</span> <span class="fn">resolve_bindings</span>(scope: <span class="pn">&</span>Scope) -> Bindings {</span></div>
+        <div class="ln cur"><span class="num">89</span><span class="g" style="background:var(--stale)"></span><span class="code">    <span class="kw">let mut</span> out = Bindings::<span class="fn">new</span>();</span></div>
+        <div class="ln"><span class="num">90</span><span class="g" style="background:var(--stale)"></span><span class="code">    <span class="kw">for</span> node <span class="kw">in</span> scope.<span class="fn">children</span>() {</span></div>
+        <div class="ln"><span class="num">91</span><span class="g" style="background:var(--stale)"></span><span class="code">        out.<span class="fn">insert</span>(node.<span class="fn">name</span>(), node.<span class="fn">kind</span>());</span></div>
+        <div class="ln"><span class="num">92</span><span class="g" style="background:var(--stale)"></span><span class="code">    }</span></div>
+        <div class="ln"><span class="num">93</span><span class="g" style="background:var(--stale)"></span><span class="code">    out</span></div>
+        <div class="ln"><span class="num">94</span><span class="g" style="background:var(--stale)"></span><span class="code">}</span></div>
+        <div class="ln"><span class="num">95</span><span class="g"></span><span class="code"></span></div>
+        <div class="ln"><span class="num">96</span><span class="g" style="background:var(--rev)"></span><span class="code"><span class="com">// reviewed · fresh · vouch still valid</span></span></div>
+        <div class="ln"><span class="num">97</span><span class="g" style="background:var(--rev)"></span><span class="code"><span class="kw">fn</span> <span class="fn">bind_one</span>(node: <span class="pn">&</span>Node) -> Binding {</span></div>
+        <div class="ln"><span class="num">98</span><span class="g" style="background:var(--rev)"></span><span class="code">    Binding::<span class="fn">new</span>(node.<span class="fn">name</span>(), node.<span class="fn">kind</span>())</span></div>
+        <div class="ln"><span class="num">99</span><span class="g" style="background:var(--rev)"></span><span class="code">}</span></div>
+        <div class="ln"><span class="num">100</span><span class="g"></span><span class="code"></span></div>
+        <div class="ln"><span class="num">101</span><span class="g" style="background:var(--rev)"></span><span class="code"><span class="com">// vouched 3 commits ago · tom@</span></span></div>
+
+        <div class="pop">
+          <div class="ttl"><b>resolve_bindings()</b><span class="badge"><i></i>STALE</span></div>
+          <dl>
+            <span>reviewer</span><b>tom@vidivouch.com · senior</b>
+            <span>rigor</span><b>read-fully</b>
+            <span>vouched</span><b>3 commits ago</b>
+          </dl>
+          <div class="chg">⚠ exact-hash changed · <b>alpha_normalize()</b> digest drift</div>
+          <div class="btns"><a class="primary" href="#">Vouch ⌃⌥V</a><a class="ghost2" href="#">Diff since review</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="report-sec">
+    <div>
+      <p class="eyebrow">The deliverable</p>
+      <h2>The un-reviewed report,<br>on every pull request.</h2>
+      <p class="sec-lede">The same provenance, scoped to a diff. The one report no linter can produce:
+        <b>what a human hasn't reviewed.</b> It's the view the CLI prints and the PR comment renders.</p>
+    </div>
+    <figure class="report" style="margin:0">
+      <figcaption class="cap">
+        <span class="dotrow"><i style="background:#ec6a5e"></i><i style="background:#f4bf4f"></i><i style="background:#61c554"></i></span>
+        <span>vid&nbsp;report&nbsp;--diff&nbsp;origin/main</span>
+      </figcaption>
+      <div class="body">
+        <div class="meta"><span>changeset · 7 units touched</span><span>lens: human ≥ senior</span></div>
+        <div class="bar">
+          <span style="width:71%;background:var(--rev-dot)"></span>
+          <span style="width:14%;background:var(--stale)"></span>
+          <span style="width:15%;background:var(--unrev)"></span>
+        </div>
+        <div class="legend">
+          <span class="k"><i class="d" style="background:var(--rev-dot)"></i>5 reviewed</span>
+          <span class="k"><i class="d" style="background:var(--stale)"></i>1 stale</span>
+          <span class="k"><i class="d ring"></i>1 unreviewed</span>
+        </div>
+        <ul class="units">
+          <li><span class="tag stale">✗ STALE</span><span class="path">src/lang/python/scope.rs <span class="fnm">· resolve_bindings</span></span><span class="note">was tom@ · senior</span></li>
+          <li><span class="tag unrev">○ NEW</span><span class="path">src/core/digest.rs <span class="fnm">· alpha_normalize</span></span><span class="note">unreviewed</span></li>
+        </ul>
+        <div class="verdict"><b>A human has not reviewed 2 of 7</b> changed units in this branch.</div>
+        <div class="gate"><span class="pass">PASS</span> gate: orphan, stale · 0 orphan · 0 exact-stale · severity advisory</div>
+      </div>
+    </figure>
+  </section>
+
+  <section class="strip">
+    <div><h3>One gesture</h3><p>The <span class="kbd">⌃⌥V</span> Gutter Vouch is the same action in every editor, never buried in a Problems panel.</p></div>
+    <div><h3>Survives the refactor</h3><p>Vouches attach to normalized code units, not lines. Rename, move, extract: the vouch follows until meaning changes.</p></div>
+    <div><h3>Never edits your code</h3><p>A vouch appends a signed entry to <code>.vid/reviews.jsonl</code>: provenance beside the source, not in it.</p></div>
+  </section>
+
+  <footer><span>© Vidi Vouch</span><b>PROOF OF HUMAN REVIEW</b></footer>
+
+</div>
+</body>
+</html>
