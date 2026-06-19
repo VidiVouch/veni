@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vid — Foundational Design</title>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+  :root { --ink:#1d1d1f; --muted:#5c6066; --line:#e2e4e8; --accent:#2D7DD2; --warn:#CC7832; --good:#3a7d3a; --bg:#fff; --code:#f5f6f8; }
+  * { box-sizing: border-box; }
+  body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); margin: 0; }
+  main { max-width: 50rem; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+  h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 .25rem; }
+  h2 { font-size: 1.35rem; margin: 2.6rem 0 .6rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.05rem; margin: 1.4rem 0 .3rem; }
+  .sub { color: var(--muted); font-size: 1.02rem; margin: 0 0 1.5rem; }
+  .meta { color: var(--muted); font-size: .85rem; margin-bottom: 2rem; }
+  code { background: var(--code); padding: .1em .35em; border-radius: 4px; font-size: .88em; font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; }
+  pre { background: var(--code); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: .85rem; }
+  pre code { background: none; padding: 0; }
+  .callout { border-left: 3px solid var(--accent); background: #f4f8fd; padding: .8rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
+  .callout.limit { border-color: var(--warn); background: #fdf6ef; }
+  .callout.change { border-color: var(--good); background: #f1f8f1; }
+  .callout .tag { font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display:block; margin-bottom:.2rem; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .9rem; }
+  th, td { border: 1px solid var(--line); padding: .5rem .6rem; text-align: left; vertical-align: top; }
+  th { background: var(--code); font-weight: 600; }
+  .lede { font-size: 1.05rem; }
+  ul, ol { padding-left: 1.3rem; } li { margin: .25rem 0; }
+  .ok { color: var(--good); font-weight: 600; } .no { color: var(--warn); font-weight: 600; }
+  .toc { columns: 2; font-size: .9rem; color: var(--muted); }
+  .toc a { color: var(--muted); text-decoration: none; } .toc a:hover { color: var(--accent); }
+  .mermaid { margin: 1.2rem 0; text-align:center; }
+  footer { color: var(--muted); font-size: .8rem; margin-top: 4rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+
+  /* ===== embedded UI mockups (scoped under .vidmock; see §12) ===== */
+  .mock-fig{margin:1.5rem 0}
+  .mock-fig figcaption{font-size:.8rem;color:var(--muted);margin-top:.55rem;text-align:center;line-height:1.45}
+  .vidmock{--rev:#5fb86a;--stale:#d2873c;--unrev:#e06c75;--partial:#c2b54a;--orphan:#71757e;--accent:#3574f0;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 14px 40px -16px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.07)}
+  .vidmock .eye{display:inline-block;vertical-align:middle}
+  .vidmock .rev{color:var(--rev)}.vidmock .stale{color:var(--stale)}.vidmock .unrev{color:var(--unrev)}.vidmock .partial{color:var(--partial)}.vidmock .orphan{color:var(--orphan)}
+  .term{background:#16181d}
+  .term .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#1f2229;border-bottom:1px solid #000}
+  .term .bar .tl{width:11px;height:11px;border-radius:50%}
+  .term .tl.r{background:#ff5f57}.term .tl.y{background:#febc2e}.term .tl.g{background:#28c840}
+  .term .bar .title{margin-left:8px;color:#6b6f78;font-size:12px}
+  .term pre{margin:0;padding:16px 18px 20px;font-size:12px;line-height:1.6;color:#c6c9d1;white-space:pre;overflow-x:auto;background:none;border-radius:0}
+  .term .p{color:#5fb86a;font-weight:700}.term .cmd{color:#e8eaf0;font-weight:500}
+  .term .dim{color:#5c616c}.term .key{color:#8d93a0}
+  .term .bar-fill{letter-spacing:-1px}.term .banner{color:#d2873c}.term .tag{font-weight:700}
+  .ide{display:flex;background:#1e1f22;color:#bcbfc7;font-size:13px}
+  .ide .tw{flex:1;min-width:0;display:flex;flex-direction:column}
+  .ide .tw-head{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #2f3136}
+  .ide .tw-head .name{font-weight:700;color:#dfe1e5;font-size:13px}
+  .ide .tw-head .sp{flex:1}
+  .ide .tw-head .lens{font-size:11px;color:#9296a0;border:1px solid #3a3d44;border-radius:5px;padding:2px 7px}
+  .ide .tw-head .ic{color:#9296a0;width:16px;height:16px}
+  .ide .summary{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #2f3136;font-size:11.5px;color:#9296a0}
+  .ide .meter{flex:1;height:6px;border-radius:3px;background:#2b2d30;overflow:hidden;display:flex}
+  .ide .meter i{display:block;height:100%}
+  .ide .tree{padding:4px 0 10px;font-size:12.5px;line-height:1.1}
+  .ide .row{display:flex;align-items:center;gap:7px;padding:4px 12px;white-space:nowrap}
+  .ide .row.sel{background:#2e436e}
+  .ide .tw-twist{color:#787c85;width:9px;display:inline-block}
+  .ide .file{color:#cdd0d6}.ide .count{color:#787c85;font-size:11px}
+  .ide .indent{padding-left:30px}
+  .ide .sdot{width:8px;height:8px;border-radius:50%;flex:none}
+  .ide .unit{color:#c6c9d1}
+  .ide .rmeta{margin-left:auto;display:flex;align-items:center;gap:8px;color:#6f737c;font-size:11px}
+  .ide .glyph{font-size:10px;border:1px solid #3a3d44;border-radius:4px;padding:0 4px;color:#9296a0}
+  .ide .sev{font-size:10px;font-weight:700;letter-spacing:.03em}
+  .ide .sev.major{color:var(--stale)}
+  .ide .reviewer{color:#6f737c}
+  .ide .strip{width:44px;background:#1c1d20;border-left:1px solid #000;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:16px}
+  .ide .strip .si{width:20px;height:20px;color:#787c85}
+  .ide .strip .si.active{color:#cfd2d8;position:relative}
+  .ide .strip .si.active::after{content:"";position:absolute;right:-12px;top:-4px;bottom:-4px;width:2px;background:var(--accent);border-radius:2px}
+  .vsc{display:flex;flex-direction:column;background:#1e1e1e;color:#ccc;font-size:13px;height:430px}
+  .vsc .body{flex:1;display:flex;min-height:0}
+  .vsc .act{width:48px;background:#333;display:flex;flex-direction:column;align-items:center;padding:9px 0;gap:15px}
+  .vsc .act .ai{width:24px;height:24px;color:#868686;position:relative}
+  .vsc .act .ai.on{color:#fff}
+  .vsc .act .ai.on::before{content:"";position:absolute;left:-9px;top:-6px;bottom:-6px;width:2px;background:#fff}
+  .vsc .side{width:228px;background:#252526;display:flex;flex-direction:column;border-right:1px solid #1a1a1a}
+  .vsc .side-h{font-size:11px;letter-spacing:.08em;color:#bdbdbd;padding:10px 12px 5px;display:flex;align-items:center;gap:7px}
+  .vsc .side-h .sp{flex:1}.vsc .side-h svg{width:14px;height:14px;color:#868686}
+  .vsc .side-sub{font-size:11px;color:#7a7a7a;padding:0 12px 7px}
+  .vsc .vr{display:flex;align-items:center;gap:6px;height:22px;padding:0 10px;white-space:nowrap}
+  .vsc .vr.sel{background:#04395e}
+  .vsc .vr .tw{width:10px;color:#868686;font-size:9px}
+  .vsc .vr .fl{color:#ccc}.vsc .vr .ct{color:#6a6a6a;font-size:11px;margin-left:auto}
+  .vsc .vr.ind{padding-left:30px}
+  .vsc .sd{width:8px;height:8px;border-radius:50%;flex:none}
+  .vsc .un{color:#ccc}
+  .vsc .badge{margin-left:auto;font-size:10px;font-weight:700}
+  .vsc .ed{flex:1;min-width:0;display:flex;flex-direction:column;background:#1e1e1e}
+  .vsc .tabs{display:flex;background:#252526;height:35px}
+  .vsc .tab{display:flex;align-items:center;gap:8px;padding:0 14px;background:#1e1e1e;color:#fff;font-size:12.5px;border-top:1px solid #0e639c}
+  .vsc .tab .x{color:#868686}
+  .vsc .code{flex:1;overflow:hidden;font-size:12.5px;line-height:1.55;padding-top:6px}
+  .vsc .cl{display:flex}
+  .vsc .ln{width:40px;text-align:right;padding-right:13px;color:#6e7681;flex:none;user-select:none}
+  .vsc .gut{width:5px;flex:none;margin-right:9px}
+  .vsc .src{white-space:pre;color:#d4d4d4}
+  .vsc .codelens{color:#7c8088;font-size:11px;font-style:italic;padding-left:4px}
+  .vsc .codelens .lk{color:#4ea0d6;font-style:normal}
+  .vsc .codelens .vouch{color:#5fb86a;font-style:normal;font-weight:600}
+  .vsc .kw{color:#569cd6}.vsc .fn{color:#dcdcaa}.vsc .ty{color:#4ec9b0}.vsc .st{color:#ce9178}
+  .vsc .status{height:24px;background:#007acc;display:flex;align-items:center;color:#fff;font-size:11.5px}
+  .vsc .status .it{display:flex;align-items:center;gap:5px;padding:0 9px;height:100%}
+  .vsc .status .sp{flex:1}
+  .vsc .status .vdot{width:8px;height:8px;border-radius:50%;background:#aef0af}
+  .set{background:#1e1f22;color:#bcbfc7;font-size:13px;max-width:600px;margin:0 auto}
+  .set .sh{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid #2f3136}
+  .set .sh .name{font-weight:700;color:#dfe1e5}
+  .set .b2{padding:15px 18px 18px}
+  .set .grp{margin-bottom:20px}.set .grp:last-child{margin-bottom:0}
+  .set .gh{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8a8f98;margin-bottom:11px;display:flex;align-items:center;gap:9px}
+  .set .tagm{font-size:9.5px;border:1px solid #3a3d44;border-radius:4px;padding:1px 6px;letter-spacing:.03em;text-transform:none}
+  .set .tagm.local{color:#5fb86a;border-color:#345c39}.set .tagm.gov{color:#d2873c;border-color:#5c4a33}
+  .set .crow{display:flex;align-items:center;gap:11px;padding:4px 0}
+  .set .sw{width:24px;height:15px;border-radius:3px;border:1px solid rgba(255,255,255,.16);cursor:pointer}
+  .set .clabel{width:92px;color:#cdd0d6}
+  .set .hex{font-size:11px;color:#8a8f98;background:#17181b;border:1px solid #34373d;border-radius:4px;padding:2px 7px}
+  .set .note{font-size:11px;color:#777b83;margin-top:9px}
+  .set .mono{color:#a9b1bd}
+  .set .banner2{background:#2a2014;border:1px solid #5c4a33;border-radius:6px;padding:9px 12px;font-size:11.5px;color:#d8b78a;margin-bottom:13px;display:flex;gap:9px;line-height:1.5}
+  .set .kv{display:flex;gap:9px;align-items:center;padding:3px 0;font-size:12.5px}
+  .set .kv .k{width:118px;color:#9296a0;flex:none}
+  .set .chip{font-size:11px;background:#2b2d30;border:1px solid #3a3d44;border-radius:5px;padding:1px 7px;color:#c6c9d1}
+  .set .chip b{color:#dfe1e5}
+  .set .prim{color:#5fb86a;font-weight:700;font-size:9.5px;border:1px solid #345c39;border-radius:4px;padding:1px 6px}
+  .set .btn{margin-top:14px;display:inline-flex;align-items:center;gap:7px;background:#3574f0;color:#fff;border-radius:6px;padding:7px 13px;font-size:12.5px;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Vid — Foundational Design</h1>
+<p class="sub">A code-review provenance system: which units of code a human (or a tool) reviewed — surviving refactors, resisting forgery, across many languages.</p>
+<p class="meta">Status: <strong>foundation locked, pre-build</strong> · implementation <strong>Rust</strong> · greenfield · brand <strong>Vidi Vouch</strong>, tool <code>vid</code> · pressure-tested by a 10-agent adversarial review (verdict: <em>sound-with-changes</em>) · all 7 open decisions settled · 2026-06-18; editor-integration &amp; GitHub surfaces refined 2026-06-19 (mockups in <code>editor-plugin-designs.html</code>).</p>
+
+<div class="callout">
+<span class="tag">What a review attests — and what it does not</span>
+A <code>vid</code> review asserts that a named identity reviewed a unit of code <em>at a specific normalized shape</em>. It is <strong>not</strong> proof of understanding, nor of behavioral correctness, nor (in phase 1) cryptographic proof of <em>who</em>. The headline deliverable is the <strong>"un-reviewed by a human" report</strong>; everything below exists to make that report mean something.
+</div>
+
+<h2 id="toc">Contents</h2>
+<div class="toc">
+1. <a href="#purpose">Purpose &amp; headline deliverable</a><br>
+2. <a href="#threat">Threat model &amp; trust posture</a><br>
+3. <a href="#primitive">The core primitive</a><br>
+4. <a href="#scope">Alpha-normalization &amp; the scope model</a><br>
+5. <a href="#profiles">Languages &amp; NormalizationProfiles</a><br>
+6. <a href="#reconcile">Move / rename / extract reconcile</a><br>
+7. <a href="#record">The record</a><br>
+8. <a href="#lanes">Two lanes &amp; the class boundary</a><br>
+9. <a href="#monotonicity">Monotonicity, storage &amp; revocation</a><br>
+10. <a href="#trust">trust.toml — the policy TCB</a><br>
+11. <a href="#signing">Signing seam</a><br>
+12. <a href="#surfaces">Surfaces — CLI, SARIF, plugin, GitHub</a><br>
+13. <a href="#report">The un-reviewed report</a><br>
+14. <a href="#limits">Known limitations</a><br>
+15. <a href="#versioning">Versioning &amp; migration</a><br>
+16. <a href="#impl">Implementation &amp; distribution (Rust)</a><br>
+17. <a href="#naming">Naming &amp; namespaces</a><br>
+18. <a href="#build">Build sequence &amp; MVP scope</a><br>
+</div>
+
+<h2 id="purpose">1. Purpose &amp; headline deliverable</h2>
+<p class="lede"><code>vid</code> records <strong>which code units a human reviewed</strong>, in a way that survives refactoring and resists forgery, and produces an <strong>"un-reviewed (by a human) report."</strong> It began as tooling for a large LLM-assisted port (legacy → rebuild), where reviewers needed to mark code "read and verified equivalent" and see what remained unchecked.</p>
+<p>A review attaches to a code <strong>unit</strong> (function, class, module statement, doc section), not to a diff or a line. The signal is durable: a review holds through cosmetic change and rename/move, and goes <em>stale</em> on behavioral change — with no dependence on git history (rebase-, squash-, shallow-clone-safe).</p>
+
+<h2 id="threat">2. Threat model &amp; trust posture</h2>
+<ul>
+<li><strong>Phase 1 is an honesty / UX nudge, not unforgeability.</strong> Identity is self-asserted, the human/tool boundary lives in a bypassable hook, and the store is a committed file. A one-line append forges "human coverage." <code>vid</code> makes such forgery <em>diff-visible</em> and <em>CI-checkable</em> — it does not prevent it.</li>
+<li><strong>External prerequisites</strong> without which human coverage is theater: a protected branch, a required <code>vid verify</code> check, and CODEOWNERS on the policy file. <code>vid</code> assumes these; it does not provide them.</li>
+<li><strong>Phase 2 binds trust to cryptography</strong> (§11): the lane becomes a property of the signing credential issuer; records are DSSE-signed and logged.</li>
+<li><strong>Irreducible residual risk:</strong> an insider (or in-house agent) holding a live human session can sign as that human even in phase 2. Documented, not solved, without per-review hardware attestation.</li>
+</ul>
+<div class="callout"><span class="tag">Consequence</span>The headline report prints a <strong>"human coverage is self-asserted and unverified"</strong> banner until signing lands, and phase-1 human-lane records are excluded from any senior/release gate.</div>
+
+<h2 id="primitive">3. The core primitive</h2>
+<p>A reviewable unit is a <strong>node</strong> in a per-language normalized tree produced by a versioned <code>NormalizationProfile</code>. Each node carries <strong>two independent digests</strong>. <em>This primitive is implementation-language-agnostic — it is an algorithm and a data model, equally expressible in Rust (our choice) as in any language.</em></p>
+<table>
+<tr><th>Digest</th><th>What it is</th><th>Role</th></tr>
+<tr><td><strong>Exact hash</strong></td><td><code>sha256</code> of the canonical alpha-normalized serialization, parameterized by <code>(profileVersion, scopeModelVersion)</code>, sensitive to free-name <em>binding-kind</em></td><td><strong>Identity + freshness.</strong> Strictly <strong>binary</strong> (matches / STALE). The only thing that gates re-review and human coverage.</td></tr>
+<tr><td><strong>Similarity digest</strong></td><td>the multiset of the node's <em>children's</em> exact hashes, stored in the record at review time</td><td><strong>Severity only — advisory.</strong> Never gates anything; drives queue triage and gutter intensity.</td></tr>
+</table>
+<h3>Severity</h3>
+<p><code>severity = bucket( max(relative, absolute) )</code>, <code>relative = 1 − RuzickaMultisetJaccard(stored_children, current_children)</code>, <code>absolute</code> = count of added/removed/modified child hashes. A <strong>single changed child can never bucket below MINOR</strong> — a one-line auth flip in a large function cannot hide as NONE.</p>
+<div class="callout change"><span class="tag">Forced change · resolved</span>Jaccard is <strong>true multiset Ruzicka</strong> (sum-of-mins / sum-of-maxes), with a mandated unit test that <code>{s,s}</code> vs <code>{s}</code> is nonzero. Set-based is forbidden.</div>
+<h3>Ordered vs unordered children</h3>
+<p>A per-node-kind flag drives <strong>both</strong> digests, so the signals can't disagree. <strong>Ordered</strong> (function/method bodies, control-flow bodies, import prologue): positional exact hash, adjacent-pair <em>bigram</em> shingles for similarity, so reorders surface nonzero severity. <strong>Unordered</strong> (module top-level, most class members, HTML attributes): <em>sorted</em> child-hashes, unigram multiset — reorder invariant.</p>
+<div class="callout change"><span class="tag">Forced change · resolved</span><strong>Class-body ordering is conditional</strong>: ordered when a field-ordering base/decorator (dataclass/Pydantic/NamedTuple/Enum), a sibling-referencing member decorator (<code>@x.setter</code>), or <code>@overload</code> is present; unordered otherwise. A reorder of a conditionally-ordered class reads <strong>full STALE</strong> (decision #6); the dual-digest reserves a later "reorder-only" variant with no format change.</div>
+<p><strong>"Whole file" is not a hashable unit</strong> — file coverage is derived from child-unit coverage, so appending a sibling never stales the file.</p>
+<div class="mermaid">
+flowchart TD
+  SRC[Source file, any language] --> PROF[NormalizationProfile - tree-sitter + scope binder]
+  PROF --> TREE[Normalized node tree]
+  TREE --> EX["Exact hash = sha256(canonical)\nbinary freshness"]
+  TREE --> SIM["Child-hash multiset\nadvisory severity"]
+  EX --> REC[in-toto Statement record]
+  SIM --> REC
+  REC --> STORE[".vid/reviews.jsonl\nunion-merge, positive claims only"]
+  STORE --> VERIFY[vid verify]
+  STORE --> REPORT[un-reviewed report]
+</div>
+
+<h2 id="scope">4. Alpha-normalization &amp; the scope model</h2>
+<p>Alpha-normalization rewrites a unit's <strong>own name, parameters, and locally-bound names</strong> to positional placeholders, keeping <strong>free names</strong> (called functions, imports, attributes, operators, types). Invariant to rename / param-rename / local-rename / move / reformat; sensitive to literal / called-name / added-param / decorator / control-flow change.</p>
+<div class="callout change"><span class="tag">Parser-agnostic by design</span>Bound/free classification runs against <strong>vid's own versioned canonical scope model</strong>, built on the parse tree — never the parser's built-in scope and never a language's live interpreter. This decision was always parser-agnostic, so it transfers unchanged to Rust + tree-sitter: the parser provides the tree; the profile provides the bindings via a hand-written CST binder keyed on node type. <code>scopeModelVersion</code> is a signed field.</div>
+<div class="callout change"><span class="tag">Forced change · resolved</span>The exact hash is sensitive to free-name <strong>binding-kind transitions</strong> (imported ↔ local-shadow ↔ builtin), closing a lift-and-shift vector where a kept free name is later shadowed/monkeypatched. The hash attests to normalized syntactic shape, not semantics.</div>
+
+<h2 id="profiles">5. Languages &amp; NormalizationProfiles</h2>
+<p><code>vid</code> is built to be <strong>versatile across many languages</strong>. The architecture: <strong>tree-sitter as the universal frontend</strong> — one grammar crate per language (≈any language) — behind a single <code>NormalizationProfile</code> trait. <strong>Adding a language = add a grammar crate + write its profile.</strong> A profile declares: unit node-types, bound/free scope rules (CST binder), ordered/unordered per node-kind, ignore-for-hash, and semantic toggles.</p>
+<div class="callout"><span class="tag">Dedicated-parser escape hatch</span>The default substrate is uniform tree-sitter. Where a language needs higher fidelity than its grammar gives, a dedicated parser can be swapped in <em>behind the same trait</em> (e.g. <code>ruff_python_ast</code> for Python) without touching the engine. tree-sitter is a CST (we walk named nodes) and may differ from a language's official AST in corners — fine for a hashing/identity tool, since we define the canonical form over the chosen parser and version it with <code>profileVersion</code>.</div>
+<h3>MVP languages &amp; their tier</h3>
+<table>
+<tr><th>Tier</th><th>Languages (MVP)</th><th>Treatment</th></tr>
+<tr><td><strong>Binding</strong></td><td>Python, JavaScript, <strong>Rust</strong></td><td>full alpha-normalization; own CST scope binder per language (the binder pattern generalizes across all three)</td></tr>
+<tr><td><strong>Structural</strong></td><td>HTML (+ Django/Jinja templates)</td><td>no bindings → structural hash of a spec tree; coarse unit boundary (landmark/block/section); <code>&lt;script&gt;</code>/<code>&lt;style&gt;</code> injections routed to their profiles</td></tr>
+<tr><td><strong>Prose + fences</strong></td><td>Markdown (CommonMark/GFM)</td><td>comrak container; prose sections (heading-scoped, weak invariance, sentence-shingle severity); code fences routed by info-string, fragment-tolerant + opaque-text fallback</td></tr>
+</table>
+<p><strong>vid reviews vid:</strong> the Rust profile (<code>tree-sitter-rust</code>) means the tool self-hosts — its own codebase is a first-class review target.</p>
+
+<h2 id="reconcile">6. Move / rename / extract reconcile</h2>
+<p>A review re-anchors to a moved/renamed unit <strong>only when all hold</strong>: old address gone, exact hash unique repo-globally, and unit above the complexity floor. It never silently transfers a human verdict and never reuses the old signature — it emits a <strong>new, unsigned "review may have moved here" suggestion</strong> requiring one-keystroke human re-confirm.</p>
+<div class="callout"><span class="tag">Why the complexity floor</span>Empty/trivial units (e.g. an empty <code>__init__.py</code>, <code>mod.rs</code> re-exports, trivial passthroughs) collide on hash, so a naive uniqueness rule churns or launders a human vouch onto attacker code. Sub-floor units are structurally ineligible for auto-reconcile.</div>
+<div class="callout limit"><span class="tag">Accepted limitation</span><strong>Extract-method / cross-function move</strong> loses the review. Mitigated by the same non-authoritative suggestion (diff old child-multiset against nearby new units); never auto-attached.</div>
+
+<h2 id="record">7. The record</h2>
+<p>Each record is an <strong>in-toto Statement</strong>, DSSE-envelope-ready from day one, validated against a JSON Schema published at the <code>predicateType</code> URL.</p>
+<pre><code>{
+  "_type": "https://in-toto.io/Statement/v1",
+  "subject": [{
+    "name": "repo+path::qualpath",
+    "digest": { "sha256": "&lt;hex of canonical alpha-normalized form&gt;" }   // ONLY a true content digest
+  }],
+  "predicateType": "https://vidivouch.com/vid/human-review/v1",            // or .../tool-review/v1
+  "predicate": {
+    "criteria": ["equivalent"],          // CLOSED core vocab + namespaced extensions; verify fails closed on unknown
+    "rigor": "read-fully",               // skimmed | read-fully | ran-tests
+    "attesterIdentity": { },             // person (human lane) | tool+model+version+harness (tool lane)
+    "verdict": "approved",
+    "timestamp": "2026-06-18T...",       // ADVISORY; precedence uses Rekor/git topology, never this
+    "similarityMultiset": [ ],           // child-hash collection at review time (drives severity)
+    "profileVersion": "py-1", "scopeModelVersion": "py-scope-1",
+    "invarianceGrade": "code",           // code | structural | opaque
+    "signatureState": "self-asserted"    // self-asserted | signed-lenient | signed-verified
+  }
+}</code></pre>
+<div class="callout change"><span class="tag">in-toto conformance</span><code>subject.digest</code> is a <strong>true content digest only</strong> (<code>{sha256}</code>). The similarity multiset + version fields live in the <code>predicate</code> — a DSSE signature must never freeze a value the engine compares fuzzily.</div>
+<div class="callout change"><span class="tag">Path confidentiality — settled 2026-06-19</span><code>subject.name</code>'s <code>repo+path::qualpath</code> is the one field that names files and symbols in plaintext. <strong>Anything crossing the repo trust boundary (the Rekor log, a shared/aggregated report) carries an <em>opaque path token</em></strong> — a repo-keyed <strong>encryption</strong> of the qualpath (deterministic HMAC is the simpler fallback) — never the plaintext. The <strong>plaintext stays an in-repo-only display annotation, outside the DSSE envelope</strong> (same trust boundary as the code → zero marginal leak; retained so a deleted path still renders for "moved-from" display). <strong>Move/rename/orphan detection is unaffected</strong>: §6 matches by <em>content digest</em>, not path, and the stored token preserves the old address even after the path is gone; the §11 anti-copy binding still holds (a copy elsewhere → different token). Key is repo-scoped — committed in <code>.vid/</code> for private repos (keeps the public log opaque), a no-op for public repos where paths aren't secret. Residual: deterministic tokens reveal structural <em>equality</em> in a shared log, and cross-repo moves would need a shared key — both out of scope for now.</div>
+
+<h2 id="lanes">8. Two lanes &amp; the class boundary</h2>
+<ul>
+<li><strong>human-review</strong> — a person vouched. The only thing that counts toward human coverage.</li>
+<li><strong>tool-review</strong> — a tool/model examined it. Informational; never counts as human coverage; a bot can't turn a unit green.</li>
+</ul>
+<div class="callout change"><span class="tag">Forced change · resolved</span>The boundary is bound to the <strong>signing-credential issuer</strong>, not a self-asserted string: human-review requires an interactive-human OIDC issuer; tool-review requires a machine workload identity that can't obtain the human audience. Until signing lands, a committed identity allowlist gates the human lane; <code>verify</code> flags any human-lane record from a bot/CI committer or off-allowlist attester. The boundary cannot be a write-time hook (bypassable).</div>
+
+<h2 id="monotonicity">9. Monotonicity, storage &amp; revocation</h2>
+<p>Store: committed <code>.vid/reviews.jsonl</code> + a <code>.gitattributes</code> <code>merge=union</code> rule — one Statement per line, so concurrent reviews of different units merge conflict-free. The merged file is <strong>untrusted input</strong> that must pass schema + signature verification; signing is <strong>per-line DSSE</strong> (file-level signing is incompatible with union-merge).</p>
+<div class="callout change"><span class="tag">Monotonicity is enforced, not asserted</span>
+<ul style="margin:.3rem 0 0">
+<li>The union file holds <strong>positive monotone claims only</strong>; absence means "no claim." Policy may only be a positive function of the record set.</li>
+<li>Negative tool "found-issues" live in a <strong>separate append-only findings ledger</strong> (presence-tightens).</li>
+<li>Revocation is a <strong>positive signed REVOKE</strong> referencing the target's content hash, with <strong>revoke-wins</strong> precedence.</li>
+<li><code>vid verify</code> <strong>statically rejects</strong> any <code>trust.toml</code> policy referencing record absence, and dedupes content-identical lines.</li>
+</ul></div>
+<div class="callout"><span class="tag">Decision #5 — settled</span><strong>Union-merge precedence:</strong> revoke-wins, ordered by Rekor inclusion time (phase 2) or git topology — never the self-asserted timestamp.</div>
+
+<h2 id="trust">10. trust.toml — the policy TCB</h2>
+<p><code>.vid/trust.toml</code> is separate from the facts and is the <strong>trusted computing base root</strong>: standing on <strong>two unmerged axes</strong> (human role: intern/junior/senior; model tier), severity thresholds, custom-criteria registrations, and cargo-vet-style <strong>exemptions</strong>. Applied at report/verify time, so standing is re-scorable without rewriting history.</p>
+<div class="callout change"><span class="tag">Governance</span>A protected path: CODEOWNERS-gated, <strong>author-cannot-approve-own-change</strong>, no same-PR self-promotion or self-exemption; every standing/threshold/exemption change flagged <strong>privileged</strong> by <code>verify</code>. The report shows coverage under both review-time and current standing.</div>
+<h3>Coverage lenses (decision #3)</h3>
+<p>Because the two axes are never merged into one rank, a project defines <strong>named coverage lenses</strong> — monotone requirement expressions over (human role, model tier):</p>
+<pre><code>[lens.human]      # the protected deliverable
+require = "human >= senior"
+[lens.blended]    # axes combined explicitly, never collapsed to one scalar
+require = "human >= junior OR (human >= intern AND model >= T1)"
+[lens.ai]         # informational only
+require = "model >= T1"
+primary = "human"   # which lens supplies the headline number</code></pre>
+<p>Guardrails: lens expressions must be <strong>monotone</strong> (<code>verify</code> rejects any that let deletion raise coverage); <code>ai</code>/<code>blended</code> are distinctly labeled so they never pad the human number; redefining "covered" is a CODEOWNERS-gated change. Each lens can emit an optional weighted single %.</p>
+
+<h2 id="signing">11. Signing seam</h2>
+<p>Phase 2 = DSSE + Sigstore/gitsign (keyless OIDC → Fulcio short-lived cert → Rekor transparency log). The human/machine boundary is enforced by <strong>separate IdP audiences</strong>. The DSSE subject binds <code>(repo, path, hash, profileVersion, scopeModelVersion)</code> so a verbatim copy into another module doesn't carry the signature.</p>
+<div class="callout"><span class="tag">Decision #7 — settled</span><strong>Ship the signing envelope in the record from day one</strong> with lenient phase-1 verification (with an explicit <code>signatureState</code> + the unverified banner so "has envelope" ≠ "is secure"); flip enforcement on at phase 2. Retrofitting the envelope after data exists is the migration the greenfield reset avoids.</div>
+<p>Operability: public Rekor leaks emails/repo names (qualpaths are already opaque per §7) and GitHub shows no "Verified" badge for gitsign, so a <strong>private Rekor/Fulcio</strong> option is documented for enterprise.</p>
+
+<h2 id="surfaces">12. Surfaces — CLI, SARIF, plugin, GitHub</h2>
+<h3>CLI (<code>vid</code>)</h3>
+<ul>
+<li><code>vid report</code> — three buckets (human-reviewed / exempted / unreviewed) × invariance-grade × lane, under review-time and current standing; <code>--lens=human|blended|ai</code>.</li>
+<li><code>vid queue --mine</code> — copy-pasteable opaque unit-ids, triaged by severity.</li>
+<li><code>vid review &lt;id&gt; --ok</code> — defaulted criteria/rigor/lane; echoes the coverage effect. The 10-second path.</li>
+<li><code>vid verify --fail-on=…</code>, <code>vid sarif --diff &lt;base&gt;</code>, <code>vid locate</code>, <code>vid migrate</code>.</li>
+</ul>
+<figure class="mock-fig">
+<div class="vidmock term">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid — ~/RustroverProjects/vid</span></div>
+<pre><span class="p">❯</span> <span class="cmd">vid report</span>
+  <span class="dim">vid 0.1.0 · Vidi Vouch</span>                          <span class="banner">⚠ human coverage self-asserted, unverified</span>
+
+  <span class="key">Human coverage</span>  <span class="dim">lens: human ≥ senior · primary</span>
+    code        <span class="rev bar-fill">███████████</span><span class="dim bar-fill">█████████████████████████</span>  <span class="rev">129</span><span class="dim">/412</span>  31%
+    structural  <span class="rev bar-fill">████</span><span class="dim bar-fill">████████████████████████████████</span>   <span class="rev">12</span><span class="dim">/96</span>   12%
+    opaque      <span class="dim bar-fill">████████████████████████████████████</span>    <span class="orphan">0</span><span class="dim">/34</span>    0%
+
+  <span class="key">Lens</span>         <span class="key">code-grade</span>     <span class="dim">— switch with --lens</span>
+    human        129/412  31%   <span class="dim">primary deliverable</span>
+    blended      264/412  64%   <span class="dim">human≥junior OR (intern + model≥T1)</span>
+    ai           201/412  49%   <span class="dim">informational · never human coverage</span>
+
+  <span class="rev">●</span> 129 reviewed   <span class="stale">●</span> 46 stale   <span class="unrev">●</span> 219 unreviewed   <span class="partial">●</span> 14 partial   <span class="orphan">●</span> 4 orphan
+  <span class="dim">→ run</span> <span class="cmd">vid queue</span> <span class="dim">for the 46 stale + actionable units</span>
+
+<span class="p">❯</span> <span class="cmd">vid queue --mine --lens human</span>
+  <span class="dim">46 actionable · sorted by severity</span>
+
+  <span class="stale tag">✗ MAJOR</span>  src/lang/python/scope.rs<span class="dim">:88</span>   <span class="unit">resolve_bindings()</span>     <span class="dim">stale · was tom@vidivouch.com</span>
+  <span class="stale tag">✗ MAJOR</span>  src/core/digest.rs<span class="dim">:142</span>       <span class="unit">alpha_normalize()</span>      <span class="dim">stale · was dana@vidivouch.com</span>
+  <span style="color:#b3a93f" class="tag">⚠ minor</span>  src/core/node.rs<span class="dim">:54</span>          <span class="unit">NodeTree::children()</span>   <span class="dim">stale · reorder-only</span>
+  <span class="unrev tag">○</span>        src/lang/rust/profile.rs<span class="dim">:30</span>  <span class="unit">RustProfile::units()</span>   <span class="dim">unreviewed</span>
+  <span class="unrev tag">○</span>        src/cli/report.rs<span class="dim">:71</span>        <span class="unit">render_lenses()</span>        <span class="dim">unreviewed</span>
+  <span class="dim">… 41 more</span>
+
+<span class="p">❯</span> <span class="cmd">vid review src/lang/python/scope.rs:88 --ok --rigor read-fully</span>
+  <span class="rev tag">✓ recorded</span>  <span class="dim">human-review/v1</span>  <span class="unit">resolve_bindings()</span>
+    <span class="key">reviewer</span>  tom@vidivouch.com <span style="color:#9296a0">senior</span>   <span class="key">criteria</span> equivalent   <span class="key">rigor</span> read-fully
+    <span class="key">digest</span>    sha256:9f3c1a… <span class="dim">→ .vid/reviews.jsonl (signed-lenient)</span>
+    <span class="key">coverage</span>  human/code <span class="dim">128 →</span> <span class="rev">129</span><span class="dim">/412 · 31%</span>   <span class="dim">queue 46 →</span> 45
+
+<span class="p">❯</span> <span class="cmd">vid verify --diff origin/main</span>
+  <span class="rev">✓</span> changeset clean — <span class="rev">0 stale</span> · <span class="rev">0 orphan</span>  <span class="dim">(src/lang/python/scope.rs)</span>
+  <span class="dim">unreviewed not gated · severity advisory</span>
+  <span class="rev tag">PASS</span> <span class="dim">vid verify · gate: orphan,stale</span></pre>
+</div>
+<figcaption>The <code>vid</code> CLI — coverage by lens &amp; grade, a severity-sorted queue, an atomic review, and the changeset-scoped CI gate.</figcaption>
+</figure>
+<div class="callout"><span class="tag">Decision #1 — settled</span><strong>CI gate:</strong> ORPHAN + exact-hash STALE fail; <strong>severity never gates</strong> (it only prioritizes the queue). <code>--fail-on=orphan,stale</code> to opt stricter.</div>
+<div class="callout"><span class="tag">Decision #4 — settled</span><strong>SARIF vs <code>vid.json</code>:</strong> split. SARIF emits only STALE/ORPHAN findings (changeset-scoped via <code>--diff</code>) for CI/code-scanning; coverage + lane + tier + severity live in a purpose-built <code>vid.json</code> that the plugin and <code>vid report</code> consume.</div>
+<h3>Alternative CLI views <span style="font-size:.72em;color:var(--muted);font-weight:400">— proposed; one becomes the default <code>vid report</code>, the rest are flags</span></h3>
+<p>The transcript above is the session flow; these are three alternative <em>primary presentations</em> of the same <code>vid.json</code>.</p>
+<figure class="mock-fig">
+<div class="vidmock term">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid report --tree</span></div>
+<pre><span class="p">❯</span> <span class="cmd">vid report --tree --lens human</span>
+  <span class="dim">129/412 reviewed · 31% · lens: human ≥ senior</span>
+
+  <span class="rev">▾</span> src/core                 <span class="rev">3</span><span class="dim">/5</span>
+    <span class="rev">●</span> NodeTree::children       <span class="dim">h tom · senior</span>
+    <span class="stale">●</span> alpha_normalize          <span class="stale">STALE·MAJOR</span> <span class="dim">was tom</span>
+    <span class="unrev">○</span> severity_bucket          <span class="dim">unreviewed</span>
+  <span class="stale">▾</span> src/lang/python            <span class="rev">1</span><span class="dim">/4</span>
+    <span class="stale">●</span> scope · resolve_bindings <span class="stale">STALE·MAJOR</span>
+    <span class="partial">◐</span> PythonProfile            <span class="partial">2/3 partial</span>
+  <span class="unrev">▸</span> src/lang/rust              <span class="unrev">0</span><span class="dim">/6</span>
+  <span class="rev">▾</span> README.md                  <span class="rev">2</span><span class="dim">/3</span>
+    <span class="orphan">●</span> § Old API                <span class="orphan">ORPHAN</span></pre>
+</div>
+<figcaption><strong>CLI·A — tree</strong> (<code>vid report --tree</code>): the editor sidebar in the terminal — file → unit coverage, status-coloured, foldable. Best for "where are the gaps?"</figcaption>
+</figure>
+<figure class="mock-fig">
+<div class="vidmock term">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid report --diff origin/main</span></div>
+<pre><span class="p">❯</span> <span class="cmd">vid report --diff origin/main</span>
+  <span class="dim">changeset · 7 units touched · the un-reviewed-by-a-human report</span>
+
+  <span class="rev">●</span> 5 human-reviewed   <span class="stale">●</span> 1 stale   <span class="unrev">●</span> 1 unreviewed
+  <span class="key">human ≥ senior</span>  5/7   <span class="rev">+3 this changeset</span>
+  <span class="key">blended</span>       7/7
+
+  <span class="stale">✗</span> src/lang/python/scope.rs  <span class="unit">resolve_bindings</span>  <span class="stale">STALE</span> <span class="dim">was tom@ senior</span>
+  <span class="unrev">○</span> src/core/digest.rs        <span class="unit">alpha_normalize</span>   <span class="dim">unreviewed · new</span>
+  <span class="dim">→ a human has not reviewed 2 of 7 changed units</span>
+  <span class="rev tag">PASS</span> <span class="dim">gate: orphan,stale — 0 orphan, 0 exact-stale</span></pre>
+</div>
+<figcaption><strong>CLI·B — changeset</strong> (<code>vid report --diff &lt;base&gt;</code>): the literal "un-reviewed report" scoped to a diff — the same view the GitHub PR comment renders. Best for review-before-merge.</figcaption>
+</figure>
+<figure class="mock-fig">
+<div class="vidmock term">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid status</span></div>
+<pre><span class="p">❯</span> <span class="cmd">vid status</span>
+  <span class="dim">vid 0.1.0 · Vidi Vouch</span>                       <span class="banner">⚠ self-asserted, unverified</span>
+
+  <span class="key">human  </span> <span class="rev bar-fill">███████████</span><span class="dim bar-fill">█████████████████████████</span>  31%  <span class="dim">129/412</span>
+  <span class="key">blended</span> <span class="rev bar-fill">██████████████████████</span><span class="dim bar-fill">██████████████</span>  64%
+  <span class="key">trend  </span> <span class="rev">▁▂▂▃▄▅▆▇</span>  <span class="dim">+7 units this week</span>
+
+  <span class="key">top stale</span>  resolve_bindings · alpha_normalize · NodeTree::children
+  <span class="key">queue    </span>  <span class="stale">46 actionable</span>  <span class="dim">→ vid queue --mine</span></pre>
+</div>
+<figcaption><strong>CLI·C — dashboard</strong> (<code>vid status</code>): one-screen pulse — coverage bars, a <strong>review-coverage trend</strong> sparkline (terminal-side trends), top stale, queue size. Best as the at-a-glance default.</figcaption>
+</figure>
+<h3>Editor integrations</h3>
+<p>Both the <strong>JetBrains / IntelliJ</strong> plugin (id <code>com.vidivouch.vid</code>) and a <strong>VS Code</strong> extension <strong>shell out to the <code>vid</code> binary</strong> and render the same <code>vid.json</code> coverage + per-file SARIF — implementation-language-agnostic, in lockstep. The "ViD" eye is the shared mark. The settled <strong>spine</strong> is a coverage <em>sidebar / tool-window tree</em> for the overview <strong>+ inline inlay hints</strong> for in-flow provenance; the <strong>Vouch action lives on the code</strong> (the standardized <em>Gutter Vouch</em> gesture), never in a diagnostics/Problems list. <strong>Xcode</strong> joins as a <em>Source Editor Extension</em> (commands only — Xcode exposes no gutter/sidebar API). Detailed option mockups — a VS Code coverage webview, a commit-time gate, cross-editor "Review Mode" — live in <code>editor-plugin-designs.html</code>.</p>
+<div class="callout change"><span class="tag">Editor decisions — settled 2026-06-19</span>
+<ul style="margin:.3rem 0 0">
+<li><strong>Spine:</strong> sidebar/tool-window tree + inline inlay hints, both VS Code and JetBrains.</li>
+<li><strong>Gutter Vouch is the standard gesture</strong> — one action on the unit's status-coloured gutter marker (native click in JetBrains; a co-located CodeLens/hover command-link in VS Code, which has no gutter-click event; keybinding parity <code>⌃⌥V</code> in Xcode). The marker is a status dot/bar, <em>not</em> the eye glyph.</li>
+<li><strong>No diagnostics dilution:</strong> stale units are never published to the Problems panel; the interaction stays on the code.</li>
+<li><strong>Commit-time Vouch is opt-in, pre-selecting nothing</strong> — a manual commit is not evidence of human review, so committing asserts no coverage unless a unit is deliberately ticked.</li>
+<li><strong>Plugins never edit source</strong> — every review is recorded to the <code>.vid/</code> ledger, never injected as a code comment.</li>
+<li><strong>VS Code webview</strong> ships as an opt-in "Coverage" panel, to match the JetBrains tool-window's richness.</li>
+<li><strong>Review Mode</strong> (next → see provenance → Vouch) is a cross-editor standard surface.</li>
+</ul></div>
+
+<figure class="mock-fig">
+<div class="vidmock ide">
+  <div class="tw">
+    <div class="tw-head">
+      <svg class="eye" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="11" r="7.5" fill="none" stroke="#cfd2d8" stroke-width="3.4"/><circle cx="14.5" cy="13.5" r="3" fill="#cfd2d8"/></svg>
+      <span class="name">Vid</span><span class="sp"></span>
+      <span class="lens">human ▾</span>
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v4h-4"/></svg>
+      <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+    </div>
+    <div class="summary">
+      <span><b style="color:#cdd0d6">129</b> / 412 reviewed</span>
+      <span class="meter"><i style="width:31%;background:#5fb86a"></i><i style="width:11%;background:#d2873c"></i><i style="width:4%;background:#c2b54a"></i></span>
+      <span>code · human</span>
+    </div>
+    <div class="tree">
+      <div class="row sel"><span class="tw-twist">▾</span><span class="file">src/core</span><span class="count">3 / 5</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--rev)"></span><span class="unit">NodeTree::children</span><span class="rmeta"><span class="glyph">h</span>tom · senior</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--stale)"></span><span class="unit">alpha_normalize</span><span class="rmeta"><span class="sev major">STALE·MAJOR</span><span class="reviewer">was tom</span></span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--unrev)"></span><span class="unit">severity_bucket</span><span class="rmeta">unreviewed</span></div>
+      <div class="row"><span class="tw-twist">▾</span><span class="file">src/lang/python</span><span class="count">1 / 4</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--stale)"></span><span class="unit">scope.rs · resolve_bindings</span><span class="rmeta"><span class="sev major">STALE·MAJOR</span></span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--partial)"></span><span class="unit">PythonProfile</span><span class="rmeta"><span class="glyph">2/3</span>partial</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--unrev)"></span><span class="unit">canonicalize</span><span class="rmeta">unreviewed</span></div>
+      <div class="row"><span class="tw-twist">▸</span><span class="file">src/lang/rust</span><span class="count">0 / 6</span></div>
+      <div class="row"><span class="tw-twist">▾</span><span class="file">README.md</span><span class="count">2 / 3</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--rev)"></span><span class="unit">§ Install</span><span class="rmeta"><span class="glyph" title="tool lane">ai</span>coderabbit · T2</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--orphan)"></span><span class="unit">§ Old API</span><span class="rmeta"><span class="sev" style="color:var(--orphan)">ORPHAN</span></span></div>
+    </div>
+  </div>
+  <div class="strip">
+    <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg>
+    <svg class="si active" viewBox="0 0 24 24"><circle cx="12" cy="11" r="7.5" fill="none" stroke="currentColor" stroke-width="3.4"/><circle cx="14.5" cy="13.5" r="3" fill="currentColor"/></svg>
+    <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  </div>
+</div>
+<figcaption>JetBrains "Vid" tool window — coverage tree by file → unit, status-coloured, with lane (<code>h</code> human / <code>ai</code> tool) and tier glyphs, severity, a lens selector, and the eye on the right rail.</figcaption>
+</figure>
+
+<figure class="mock-fig">
+<div class="vidmock vsc">
+  <div class="body">
+    <div class="act">
+      <svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></svg>
+      <svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 8.5v7M18 10.5c0 4-6 1.5-6 5.5"/></svg>
+      <svg class="ai" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      <svg class="ai on" viewBox="0 0 24 24"><circle cx="12" cy="11" r="7.5" fill="none" stroke="currentColor" stroke-width="3.2"/><circle cx="14.5" cy="13.5" r="3" fill="currentColor"/></svg>
+    </div>
+    <div class="side">
+      <div class="side-h">VID: REVIEW COVERAGE<span class="sp"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v4h-4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M6 12h12M10 19h4"/></svg></div>
+      <div class="side-sub">human · 129 / 412 · code-grade</div>
+      <div class="vr"><span class="tw">▾</span><span class="fl">src/core</span><span class="ct">3 / 5</span></div>
+      <div class="vr ind"><span class="sd" style="background:#5fb86a"></span><span class="un">NodeTree::children</span></div>
+      <div class="vr ind"><span class="sd" style="background:#d2873c"></span><span class="un">alpha_normalize</span><span class="badge" style="color:#d2873c">STALE</span></div>
+      <div class="vr ind"><span class="sd" style="background:#e06c75"></span><span class="un">severity_bucket</span></div>
+      <div class="vr sel"><span class="tw">▾</span><span class="fl">src/lang/python</span><span class="ct">1 / 4</span></div>
+      <div class="vr ind"><span class="sd" style="background:#d2873c"></span><span class="un">resolve_bindings</span><span class="badge" style="color:#d2873c">STALE</span></div>
+      <div class="vr"><span class="tw">▸</span><span class="fl">src/lang/rust</span><span class="ct">0 / 6</span></div>
+    </div>
+    <div class="ed">
+      <div class="tabs"><span class="tab">scope.rs <span class="x">×</span></span></div>
+      <div class="code">
+        <div class="cl"><span class="ln"></span><span class="gut"></span><span class="codelens"><span style="color:#d2873c">●</span> stale · alpha-normalized body changed since review — <span class="vouch">✓ Vouch</span>  <span class="lk">⋯ details</span></span></div>
+        <div class="cl"><span class="ln">42</span><span class="gut" style="background:#d2873c"></span><span class="src"><span class="kw">pub fn</span> <span class="fn">resolve_bindings</span>(node: &amp;<span class="ty">Node</span>, scope: &amp;<span class="kw">mut</span> <span class="ty">Scope</span>) -&gt; <span class="ty">Bindings</span> {</span></div>
+        <div class="cl"><span class="ln">43</span><span class="gut" style="background:#d2873c"></span><span class="src">    <span class="kw">let mut</span> out = <span class="ty">Bindings</span>::new();</span></div>
+        <div class="cl"><span class="ln">44</span><span class="gut" style="background:#d2873c"></span><span class="src">    <span class="kw">for</span> child <span class="kw">in</span> node.named_children() {</span></div>
+        <div class="cl"><span class="ln">45</span><span class="gut" style="background:#d2873c"></span><span class="src">        <span class="kw">if</span> child.is_definition() {</span></div>
+        <div class="cl"><span class="ln">46</span><span class="gut" style="background:#d2873c"></span><span class="src">            scope.bind(child.name(), child.kind());</span></div>
+        <div class="cl"><span class="ln">47</span><span class="gut" style="background:#d2873c"></span><span class="src">        }</span></div>
+        <div class="cl"><span class="ln">48</span><span class="gut" style="background:#d2873c"></span><span class="src">    }</span></div>
+        <div class="cl"><span class="ln">49</span><span class="gut" style="background:#d2873c"></span><span class="src">    out</span></div>
+        <div class="cl"><span class="ln">50</span><span class="gut" style="background:#d2873c"></span><span class="src">}</span></div>
+        <div class="cl"><span class="ln">51</span><span class="gut"></span><span class="src"></span></div>
+        <div class="cl"><span class="ln"></span><span class="gut"></span><span class="codelens"><span style="color:#5fb86a">●</span> reviewed · tom@vidivouch.com (senior) · equivalent  <span class="lk">⋯ details</span></span></div>
+        <div class="cl"><span class="ln">52</span><span class="gut" style="background:#5fb86a"></span><span class="src"><span class="kw">fn</span> <span class="fn">free_names</span>(node: &amp;<span class="ty">Node</span>) -&gt; <span class="ty">Vec</span>&lt;<span class="ty">Name</span>&gt; {</span></div>
+        <div class="cl"><span class="ln">53</span><span class="gut" style="background:#5fb86a"></span><span class="src">    node.idents().filter(|i| !i.is_bound()).collect()</span></div>
+        <div class="cl"><span class="ln">54</span><span class="gut" style="background:#5fb86a"></span><span class="src">}</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="status">
+    <span class="it">⎇ main</span><span class="sp"></span>
+    <span class="it"><span class="vdot"></span> vid 129/412 · human</span>
+    <span class="it">Rust</span><span class="it">Ln 42, Col 1</span><span class="it">UTF-8</span>
+  </div>
+</div>
+<figcaption>VS Code — the in-editor experience: activity-bar entry, side-bar coverage tree, gutter status bars, <strong>CodeLens</strong> with a one-click <span style="color:#3a7d3a">Vouch</span> on a stale unit, and a status-bar coverage item.</figcaption>
+</figure>
+
+<h3>Plugin settings — local presentation vs governed trust</h3>
+<p>The plugins expose settings split by blast radius. <strong>Review-state colours are local &amp; live</strong> — per-editor presentation, with project defaults in committed <code>.vid/config</code>. <strong>Trust policy is governed</strong>: editing standing, lenses, thresholds, or exemptions does <em>not</em> apply locally — it opens a <strong>pull request</strong> against <code>.vid/trust.toml</code> (CODEOWNERS-gated, author-can't-approve-own-change), preserving the §10 TCB guarantees. The plugin <em>shows</em> the effective policy; it never silently rewrites it.</p>
+
+<figure class="mock-fig">
+<div class="vidmock set">
+  <div class="sh"><svg class="eye" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="11" r="7.5" fill="none" stroke="#cfd2d8" stroke-width="3.4"/><circle cx="14.5" cy="13.5" r="3" fill="#cfd2d8"/></svg><span class="name">Vid — Settings</span></div>
+  <div class="b2">
+    <div class="grp">
+      <div class="gh">Appearance · review states <span class="tagm local">local · live</span></div>
+      <div class="crow"><span class="sw" style="background:#5fb86a"></span><span class="clabel">reviewed</span><span class="hex">#5FB86A</span></div>
+      <div class="crow"><span class="sw" style="background:#d2873c"></span><span class="clabel">stale</span><span class="hex">#D2873C</span></div>
+      <div class="crow"><span class="sw" style="background:#e06c75"></span><span class="clabel">unreviewed</span><span class="hex">#E06C75</span></div>
+      <div class="crow"><span class="sw" style="background:#c2b54a"></span><span class="clabel">partial</span><span class="hex">#C2B54A</span></div>
+      <div class="crow"><span class="sw" style="background:#71757e"></span><span class="clabel">orphan</span><span class="hex">#71757E</span></div>
+      <div class="crow"><span class="clabel" style="width:92px;color:#8a8f98;font-size:11px">severity</span><span class="sw" style="background:#b3a93f"></span><span class="hex">minor</span><span class="sw" style="background:#d2873c"></span><span class="hex">major</span></div>
+      <div class="note">Stored per-editor. Project defaults live in <span class="mono">.vid/config</span> (committed); your edits override locally.</div>
+    </div>
+    <div class="grp">
+      <div class="gh">Trust &amp; lenses <span class="tagm gov">governed · .vid/trust.toml</span></div>
+      <div class="banner2"><span>⚠</span><span>Trust policy is the project's TCB. Edits don't apply locally — they open a <b>pull request</b> against <span class="mono">.vid/trust.toml</span> (CODEOWNERS-gated; you can't approve your own change).</span></div>
+      <div class="kv"><span class="k">Human standing</span><span class="chip">intern</span><span class="chip">junior</span><span class="chip"><b>senior</b></span></div>
+      <div class="kv"><span class="k">Model tiers</span><span class="chip">opus-4.8 · <b>T1</b></span><span class="chip">gpt-5 · T1</span><span class="chip">sonnet-4.6 · T3</span></div>
+      <div class="kv"><span class="k">Lens · human</span><span class="mono">human ≥ senior</span><span class="prim">PRIMARY</span></div>
+      <div class="kv"><span class="k">Lens · blended</span><span class="mono">human ≥ junior OR (intern + model ≥ T1)</span></div>
+      <div class="kv"><span class="k">Lens · ai</span><span class="mono">model ≥ T1</span></div>
+      <div class="kv"><span class="k">Severity</span><span class="mono">minor &lt; 25% changed · major ≥ 25%</span></div>
+      <div class="btn">⤴ Propose change → PR</div>
+    </div>
+  </div>
+</div>
+<figcaption>Plugin settings — colours edit locally &amp; live; the governed trust policy (standing, lenses, thresholds) is shown read-only and edits route through a PR against <code>.vid/trust.toml</code>.</figcaption>
+</figure>
+
+<h3>GitHub integration</h3>
+<p><code>vid</code>'s output is the "un-reviewed report," so the PR is where it lands. Five planes, each opt-in and forgery-resistant — and <strong>none edits your source</strong>: a <code>/vouch</code> appends a signed in-toto Statement to the in-repo <code>.vid/reviews.jsonl</code> ledger (a data file keyed by content digest), exactly as the CLI does. It is neither a code edit nor a bolted-on service — it is the same in-repo provenance layer, now reachable from the PR; the only external component is the phase-2 Sigstore/Rekor transparency log that anchors the signature.</p>
+<table>
+<tr><th>Plane</th><th>Mechanism</th><th>Behaviour</th></tr>
+<tr><td><strong>CI gate</strong></td><td>Action runs <code>vid verify --diff origin/&lt;base&gt;</code>; required check</td><td>Fails only on orphan + exact-hash stale (decision #1); severity advisory. Pairs with the §2 protected-branch prerequisite.</td></tr>
+<tr><td><strong>Inline findings</strong></td><td>SARIF → code scanning</td><td>Stale/orphan annotated on changed hunks — same surface as CodeQL, no Problems-style dilution.</td></tr>
+<tr><td><strong>Un-reviewed report</strong></td><td>Sticky PR comment, updated per push</td><td>Per-lens human-coverage delta — "what a human has / hasn't reviewed here" (renders the CLI·B view).</td></tr>
+<tr><td><strong>Vouch from GitHub</strong></td><td><code>/vouch &lt;unit&gt;</code> → GitHub App</td><td><strong>Opt-in, default none</strong> (mirrors the commit gate). Attributed to the commenting reviewer; appends to <code>.vid/reviews.jsonl</code>; merging never auto-vouches.</td></tr>
+<tr><td><strong>Identity &amp; signing</strong></td><td>GitHub OIDC → Sigstore (Fulcio/Rekor)</td><td>A <code>/vouch</code> counts only if bound to a reviewer identity with standing in <code>.vid/trust.toml</code> (itself CODEOWNERS-governed); signed keyless per §11.</td></tr>
+</table>
+<div class="callout"><span class="tag">Open sub-decision</span>Whether the App commits each <code>/vouch</code> to the PR branch as it happens (visible, immediate) or batches them into the merge commit (no mid-review churn). Both keep records in-repo in <code>.vid/reviews.jsonl</code> and leave source untouched.</div>
+
+<h2 id="report">13. The un-reviewed report</h2>
+<div class="callout"><span class="tag">Decision #3 — settled</span><strong>Stratify by invariance grade (code/structural/opaque) and lane</strong> — the honesty floor — then read through configurable named lenses (§10). Code-grade <em>human-lane</em> coverage under the <code>primary</code> lens is the headline; prose/markup/opaque and the AI/blended lenses are separate, distinctly-labeled axes that can never pad the human number.</div>
+<p>Three buckets (reviewed / exempted / unreviewed), under both review-time and current standing. The headline says "code-grade units a verified human reviewed"; it does <em>not</em> claim understanding or correctness, and (phase 1) carries the unverified-identity banner.</p>
+
+<h2 id="limits">14. Known limitations &amp; residual blind spots</h2>
+<div class="callout limit"><span class="tag">Accepted</span><strong>Extract-method / cross-function move</strong> loses the review; mitigated by a non-authoritative "may have moved here" suggestion.</div>
+<div class="callout limit"><span class="tag">Accepted</span><strong>Prose weak-invariance</strong> — prose has no behavior, so any content change re-triggers; alpha-normalization disabled for prose, sentence-grained similarity, labeled structural/opaque so it never pads code coverage.</div>
+<div class="callout limit"><span class="tag">Accepted</span><strong>Free-name rebinding</strong> — mitigated (not eliminated) by binding-kind sensitivity; the hash attests to syntactic shape, not semantics.</div>
+<div class="callout limit"><span class="tag">Accepted</span><strong>Stolen interactive human session</strong> — an insider/agent with a live human OIDC session can sign as that human even in phase 2. Irreducible without per-review hardware attestation.</div>
+
+<h2 id="versioning">15. Versioning &amp; migration</h2>
+<p>A <code>profileVersion</code>/<code>scopeModelVersion</code>/canonicalizer bump is an <strong>additive, auditable event</strong>, never a silent re-hash. Per-version hashers are retained; a version mismatch is <strong>MIGRATION-NEEDED</strong> (advisory), never STALE/FAIL. <code>vid migrate</code> writes new positive records citing the old, so coverage is preserved monotonically and nothing silently flips reviewed → unreviewed.</p>
+
+<h2 id="impl">16. Implementation &amp; distribution (Rust)</h2>
+<p><strong>Implementation language: Rust.</strong> Rationale: the <code>ty</code> / Ruff precedent (deep Rust static analysis of Python shipped as a single fast binary on PyPI + npm + brew); a single binary makes modern distribution near-free and kills the Python-freeze epic and the bundled-interpreter syntax ceiling; Ruff-class performance; and the foundational design above is implementation-agnostic, so it transfers unchanged. The Python <code>probatum</code> prototype is retained only as a <strong>reference implementation</strong>.</p>
+<h3>Cargo workspace</h3>
+<table>
+<tr><th>Crate</th><th>Responsibility</th></tr>
+<tr><td><code>vid-core</code></td><td>language-agnostic engine: recursive node + dual digest, Ruzicka multiset severity, ordered/unordered, in-toto records, monotonic store, trust.toml policy + lenses, reconcile</td></tr>
+<tr><td><code>vid-lang-*</code></td><td>one profile per language behind the <code>NormalizationProfile</code> trait (<code>python</code>, <code>javascript</code>, <code>rust</code>, <code>html</code>, <code>markdown</code>); tree-sitter grammar + CST scope binder + canonicalization list</td></tr>
+<tr><td><code>vid-cli</code></td><td>the <code>vid</code> binary (clap); report/queue/verify/review/sarif/locate/migrate</td></tr>
+</table>
+<p>Parsers: <code>tree-sitter</code> + grammar crates (<code>tree-sitter-python/-javascript/-rust/-html</code>); <code>comrak</code> for Markdown; <code>ruff_python_ast</code> available as the Python fidelity-upgrade behind the trait.</p>
+<h3>Distribution — one Cargo project, every channel</h3>
+<p><strong>cargo-dist</strong> builds per-platform binaries (macOS arm64/x64, Linux x64/arm64, Windows x64) in a CI matrix and publishes them as: npm <code>optionalDependencies</code> packages under <code>@vidivouch/vid</code> (→ <code>npx</code>/<code>bunx</code>/<code>deno</code>), a Homebrew formula, and a shell installer. <strong>maturin</strong> builds the PyPI wheel carrying the same binary (so <code>uv tool install vid</code> / <code>pip install vid</code> work, à la Ruff). The freeze step and the syntax ceiling from the Python-impl plan are gone.</p>
+<table>
+<tr><th>Channel</th><th>Audience</th><th>Mechanism</th></tr>
+<tr><td>PyPI (<code>uv tool install vid</code> / <code>pipx</code>)</td><td>Python devs</td><td>maturin wheel (native binary inside)</td></tr>
+<tr><td>npm / npx / bunx / deno (<code>@vidivouch/vid</code>)</td><td>JS/web devs (who review JS/HTML/MD)</td><td>cargo-dist per-platform pkgs + launcher</td></tr>
+<tr><td>Homebrew tap / direct download</td><td>CLI users</td><td>cargo-dist formula + installer</td></tr>
+</table>
+<p>The IDE plugin shells out to whichever <code>vid</code> binary is on PATH, so it is unaffected by the implementation language.</p>
+
+<h2 id="naming">17. Naming &amp; namespaces</h2>
+<p><strong>Brand / company: Vidi Vouch.</strong> <em>vidi</em> = "I saw" (Latin, <em>veni, vidi, vici</em>) + <em>vouch</em> (the project's original name, recovered at the brand layer). The tool is <strong><code>vid</code></strong> — name = command = package. The wordmark "ViD" sets the <code>i</code>'s tittle as a large eye (i = eye = "I saw") on a shortened stem.</p>
+<p class="meta">All availability verified 2026-06-18 (whois / registry / GitHub API). Domain availability is registrable-now, not reserved — claim before relying.</p>
+<h3>Domains</h3>
+<table>
+<tr><th>Domain</th><th>Role</th><th>Status</th></tr>
+<tr><td><code>vidivouch.com</code></td><td>canonical</td><td class="ok">✓ registered (2026-06-19)</td></tr>
+<tr><td><code>vidi-vouch.com</code></td><td>redirect → canonical (hyphen-drop capture)</td><td class="ok">available — claim</td></tr>
+<tr><td><code>vidi.sh</code></td><td>redirect → canonical (CLI-friendly short link)</td><td class="ok">✓ registered (2026-06-19)</td></tr>
+<tr><td><code>vidi.com</code> / <code>.dev</code> / <code>.io</code> / <code>.app</code></td><td>—</td><td class="no">taken (not pursued)</td></tr>
+<tr><td><code>probatum.dev</code></td><td>—</td><td class="no">registered by a third party (2026-03-14) — never use</td></tr>
+</table>
+<h3>Registries &amp; handles</h3>
+<table>
+<tr><th>Namespace</th><th>Status &amp; plan</th></tr>
+<tr><td><strong>PyPI <code>vid</code></strong></td><td class="ok">FREE — claim now (unscoped); satisfies "<code>vid</code> on PyPI"</td></tr>
+<tr><td><strong>npm <code>@vidivouch/vid</code></strong></td><td class="ok">scope FREE — claim now → <code>npx/bunx @vidivouch/vid</code>. The clean, immediate npm home.</td></tr>
+<tr><td>npm unscoped <code>vid</code></td><td>TAKEN by a dead stub (one 0.0.1 from 2016, no repo, ~13 downloads/mo). <strong>Optional</strong> later acquisition; not a blocker.</td></tr>
+<tr><td><strong>GitHub org <code>vidivouch</code></strong></td><td class="ok">FREE — create; repo <code>vidivouch/vid</code></td></tr>
+<tr><td>GitHub user <code>Vidi</code></td><td>TAKEN (dormant). <strong>Optional</strong> handle; GitHub doesn't broker username transfers, so not pursued.</td></tr>
+<tr><td>JetBrains plugin id</td><td><code>com.vidivouch.vid</code></td></tr>
+<tr><td>in-toto predicateType</td><td><code>https://vidivouch.com/vid/{human-review,tool-review}/v1</code></td></tr>
+</table>
+<h3>Claim now (needs Tom's accounts)</h3>
+<ol>
+<li><s>Register <code>vidivouch.com</code></s> ✓ and <s><code>vidi.sh</code></s> ✓ (2026-06-19) — now point <code>vidi.sh</code> at the canonical; still register <code>vidi-vouch.com</code> and point it there too.</li>
+<li>Create GitHub org <code>vidivouch</code>.</li>
+<li>Claim npm scope <code>@vidivouch</code>; claim PyPI <code>vid</code>. (Agent can prep a PyPI placeholder to lock the name.)</li>
+</ol>
+<h3>Optional outreach (later — to acquire bare names)</h3>
+<table>
+<tr><th>Target</th><th>Owner</th><th>Contact</th><th>Notes</th></tr>
+<tr><td>npm unscoped <code>vid</code></td><td>Fabian Pirklbauer (<code>fabiandev</code>)</td><td><code>hi@fabiandev.io</code></td><td>Dead 2016 stub, ~13 dl/mo. Friendly transfer ask; npm package-name dispute as backstop.</td></tr>
+<tr><td>GitHub user <code>Vidi</code></td><td>"David" (London web dev)</td><td><code>david.heams@googlemail.com</code></td><td>Dormant account. Transfer is hard (GitHub won't force-release); low priority since <code>vidivouch</code> is held.</td></tr>
+</table>
+<h3>Trademark note</h3>
+<p>"VIDI" alone is crowded in tech (a registered Cognex machine-vision mark; a video-on-demand cluster) — relevant only if <code>vid</code> goes commercial. The compound <strong>"Vidi Vouch"</strong> is more distinctive/defensible. No formal clearance done; do proper clearance in the actual class/jurisdiction (incl. CIPO/Canada) before relying on it as a registered mark.</p>
+<h3>License — settled 2026-06-19</h3>
+<p><strong>Open-core, GitLab-style.</strong> The <code>vid</code> <strong>tool</strong> — CLI, <code>vid-core</code> engine, language profiles, editor plugins, SARIF, the <code>.vid/</code> ledger format, the GitHub Action — is <strong><code>MIT</code>-licensed</strong> (matching GitLab CE; chosen for simplicity and maximal adoption — a provenance <em>standard</em> must be neutral and frictionless). A future hosted <strong>Vidi Vouch platform</strong> — cross-repo/org dashboards, managed private Rekor/Fulcio, SSO/RBAC, compliance reporting — is the <strong>proprietary</strong> commercial layer (the GitLab CE/EE split), where the commercial upside lives (as §11's private-Rekor note already pointed), rather than in encumbering the tool. File: <code>LICENSE</code> at the repo root; <code>Cargo.toml</code> <code>license = "MIT"</code>.</p>
+<h3>Repos — the three-repo split</h3>
+<p>Open-core needs a clean public/private boundary, so the work lives in three repos under the <code>vidivouch</code> org, named for <em>veni, vidi, vici</em>:</p>
+<table>
+<tr><th>Repo</th><th>Visibility</th><th>Holds</th></tr>
+<tr><td><code>vidivouch/veni</code> — "I came"</td><td><strong>private</strong></td><td><strong>Planning.</strong> This design, the editor/CLI/GitHub explorations, strategy, the acquisition checklist below. Never published — the public repo carries none of its history.</td></tr>
+<tr><td><code>vidivouch/vid</code> — "vidi · I saw"</td><td><strong>public</strong></td><td>The <strong>MIT tool</strong>: CLI, engine, language profiles, editor plugins, ledger format, GitHub Action. Created clean at launch.</td></tr>
+<tr><td><code>vidivouch/vici</code> — "I conquered"</td><td><strong>private</strong></td><td>The <strong>proprietary platform</strong>: hosted dashboards, managed private Rekor/Fulcio, SSO/RBAC, billing.</td></tr>
+</table>
+
+<h2 id="build">18. Build sequence &amp; MVP scope</h2>
+<p>Greenfield Rust workspace, clean core first. The <strong>record envelope is the one irreversible decision</strong>; everything else is replaceable.</p>
+<ol>
+<li><strong>Lock the record envelope</strong> — in-toto Statement (<code>subject.digest={sha256}</code> only; predicate per §7; DSSE-ready); publish the JSON Schema at the predicateType URL.</li>
+<li><strong><code>vid-core</code> engine</strong> — node tree, exact hash (parameterized), true-multiset Ruzicka Jaccard, ordered/unordered driving both digests, <code>severity = bucket(max(rel,abs))</code> + single-child floor. Tests: <code>{s,s}</code>≠<code>{s}</code>; reorder ⇒ STALE + nonzero severity; one-of-twenty ⇒ MINOR not NONE.</li>
+<li><strong>NormalizationProfile trait + tree-sitter</strong>; first binding profile (Python or Rust) with its own CST scope binder; conditional class ordering; binding-kind sensitivity; pinned <code>scopeModelVersion</code>.</li>
+<li><strong>Monotonic store + verify</strong> — positive-claims-only union JSONL, content-addressed dedupe, separate findings ledger, signed REVOKE (revoke-wins); verify rejects non-monotone policy; treats the file as untrusted. Test: deleting any line can only lower coverage.</li>
+<li><strong>Move/rename reconcile</strong> — complexity floor + repo-global uniqueness + never-reuse-signature + one-keystroke re-confirm; empty-unit collision regression test.</li>
+<li><strong>Signing seam scaffolding</strong> — ship the envelope, identity allowlist, issuer-audience separation, the unverified banner. Phase-1 lenient.</li>
+<li><strong>trust.toml TCB</strong> — two unmerged axes, thresholds, exemptions, lenses, profile-impl hash pin; privileged-change flagging; anti-self-promotion.</li>
+<li><strong><code>vid</code> CLI</strong> (clap) — the §12 surface.</li>
+<li><strong>Add JS + Rust profiles</strong> (binding-language binders; self-hosting check).</li>
+<li><strong>HTML + Markdown profiles</strong> (spec tree + injections; comrak container + fenced-code rung ladder).</li>
+<li><strong>SARIF emitter (findings-only) + <code>vid.json</code> coverage artifact.</strong></li>
+<li><strong>Distribution</strong> — cargo-dist (npm/brew/installer) + maturin (PyPI wheel).</li>
+<li><strong>JetBrains plugin</strong> — repoint the existing Kotlin plugin at the <code>vid</code> binary; <code>com.vidivouch.vid</code>; eye wordmark.</li>
+</ol>
+<h3>Decisions (settled — 2026-06-18)</h3>
+<table>
+<tr><th>#</th><th>Decision</th><th>Resolution</th></tr>
+<tr><td>1</td><td>Does any change to reviewed code fail CI?</td><td>Gate on staleness, severity-blind: STALE + ORPHAN fail; severity never gates (<code>--fail-on</code>)</td></tr>
+<tr><td>2</td><td>Docstrings / module constants</td><td>Own leaf units (graded structural)</td></tr>
+<tr><td>3</td><td>Coverage metric</td><td>Stratify by grade + lane; configurable lenses (human/blended/AI) + optional weighted %; code-grade human-lane under <code>primary</code> = headline</td></tr>
+<tr><td>4</td><td>SARIF vs vid.json</td><td>Split — SARIF findings-only, coverage in vid.json</td></tr>
+<tr><td>5</td><td>Union-merge precedence</td><td>Revoke-wins + Rekor/git-topology; never the self-asserted timestamp</td></tr>
+<tr><td>6</td><td>Conditionally-ordered class reorder</td><td>Full STALE for v1; dual-digest reserves a later reorder-only variant</td></tr>
+<tr><td>7</td><td>Signing envelope timing</td><td>Ship day one (lenient verify, signatureState + banner); enforce at phase 2</td></tr>
+</table>
+
+<footer>
+Vid — foundational design · brand Vidi Vouch · implementation Rust · from a 10-agent adversarial pressure-test (4 language specialists + design-core, design-model, integrations/viz, CLI, security/threat + synthesis) · verdict sound-with-changes · 2026-06-18.
+</footer>
+
+</main>
+</body>
+</html>
