@@ -1,0 +1,40 @@
+index.html
+  s_64136f9b85a4e3::t_58dafd77a12753 173
+  s_64136f9b85a4e3::t_be310201902e56 226
+  s_64136f9b85a4e3::t_a8599bb5937fef 262
+  s_64136f9b85a4e3::t_2f2ec0114cf885 7
+  s_64136f9b85a4e3::t_3dd906a1adf25b 162
+  s_64136f9b85a4e3::t_64e3fe1746344b 213-217
+  s_64136f9b85a4e3::t_8a160af4c770b8 269
+  s_64136f9b85a4e3::t_e818bb0c13fcbf 175
+  s_64136f9b85a4e3::t_fb67ded88ad4a7 203
+  s_64136f9b85a4e3::t_a017ed54ef4716 237
+  s_64136f9b85a4e3::t_0bde3169b179d7 1-5,10,17-18,25-26,146-149,231,272,274,276-277
+  s_64136f9b85a4e3::t_6d1de88753bfba 212
+  s_64136f9b85a4e3::t_f8223c1b2fb491 170
+  s_64136f9b85a4e3::t_0008a638fad3cd 268
+  s_64136f9b85a4e3::t_99fa4e8883902a 8-9,12-16,19-24,27-145,150-161,163-169,171-172,174,176-202,204-211,218-225,227-230,232-236,238-261,263-267,271,273,275
+  s_64136f9b85a4e3::t_e473ad7bf1847b 6,11
+  s_64136f9b85a4e3::t_970b8f28a5ea02 270
+README.md
+  s_64136f9b85a4e3::t_c46859febafcd6 2,5-7,11-13
+  s_64136f9b85a4e3::t_b06893e9e16914 1,3-4,8-10,14
+.gitignore
+  s_64136f9b85a4e3::t_9d17a33a710683 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "5483adafeca50598edeafcc982d8d167018a3016",
+  "prompts": {},
+  "sessions": {
+    "s_64136f9b85a4e3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "47063f18-7481-446d-ad6e-dfe940be3ac2",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Tom Price <tom@tomprice.ca>"
+    }
+  }
+}
