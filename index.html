@@ -262,16 +262,16 @@
     <div>
       <p class="eyebrow">The deliverable</p>
       <h2>The un-reviewed report,<br>on every pull request.</h2>
-      <p class="sec-lede">The same provenance, scoped to a diff. The one report no linter can produce:
+      <p class="sec-lede">The one report no linter can produce:
         <b>what a human hasn't reviewed.</b> It's the view the CLI prints and the PR comment renders.</p>
     </div>
     <figure class="report" style="margin:0">
       <figcaption class="cap">
         <span class="dotrow"><i style="background:#ec6a5e"></i><i style="background:#f4bf4f"></i><i style="background:#61c554"></i></span>
-        <span>vid&nbsp;report&nbsp;--diff&nbsp;origin/main</span>
+        <span>vid&nbsp;report</span>
       </figcaption>
       <div class="body">
-        <div class="meta"><span>changeset · 7 units touched</span><span>lens: human ≥ senior</span></div>
+        <div class="meta"><span>7 units</span><span>scope: human ≥ senior</span></div>
         <div class="bar">
           <span style="width:71%;background:var(--rev-dot)"></span>
           <span style="width:14%;background:var(--stale)"></span>
@@ -308,6 +308,10 @@
 [axes]
 human.order   = [<span class="s">"intern"</span>, <span class="s">"principal"</span>]
 machine.order = [<span class="s">"coderabbit"</span>, <span class="s">"claude-sonnet-4-6"</span>, <span class="s">"claude-opus-4-8"</span>]
+
+<span class="c"># only allowlisted reviewers count — off-allowlist vouches read "unverified" (fail-closed)</span>
+[reviewers]
+<span class="s">"sr@acme.com"</span> = <span class="s">"principal"</span>
 
 <span class="c"># billing: a principal human AND an opus-class machine</span>
 [[scope]]
@@ -378,7 +382,7 @@ accept = [{ human = <span class="s">"intern"</span> }, { machine = <span class="
   <section class="strip">
     <div><h3>One gesture</h3><p>The <span class="kbd">⌃⌥V</span> Gutter Vouch is the same action in every editor, never buried in a Problems panel.</p></div>
     <div><h3>Survives the refactor</h3><p>Vouches attach to normalized code units, not lines. Rename, move, extract: the vouch follows until meaning changes.</p></div>
-    <div><h3>Never edits your code</h3><p>A vouch appends a signed entry to <code>.vid/reviews.jsonl</code>: provenance beside the source, not in it.</p></div>
+    <div><h3>Never edits your code</h3><p>A vouch appends an append-only entry to <code>.vid/reviews.jsonl</code>: provenance beside the source, not in it.</p></div>
   </section>
 
   <footer><span>© Vidi Vouch</span><b>PROOF OF HUMAN REVIEW</b></footer>
