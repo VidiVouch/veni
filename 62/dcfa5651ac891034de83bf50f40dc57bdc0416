@@ -1,0 +1,19 @@
+CNAME
+  s_6c77829e839ee2::t_fc5acedac1141f 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "62dcfa5651ac891034de83bf50f40dc57bdc0416",
+  "prompts": {},
+  "sessions": {
+    "s_6c77829e839ee2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a08fc637-01ce-475b-a1ec-8299ba781c80",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Tom Price <tom@tomprice.ca>"
+    }
+  }
+}
