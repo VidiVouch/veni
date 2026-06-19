@@ -11,16 +11,18 @@
 <meta property="og:title" content="Vidi Vouch · proof of human code review">
 <meta property="og:description" content="Review provenance in your editor; the un-reviewed report on every pull request.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='none'%20stroke='%231d1d1f'%20stroke-width='3'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='3.5'%20fill='%231d1d1f'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Brand font: Maple Mono (deliberately NOT JetBrains Mono, and NOT on Google
+     Fonts). Loaded via the Fontsource CDN; self-hosting the OFL .woff2 files is
+     the preferred follow-up. Degrades to the system monospace if unavailable. -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/maple-mono@5/index.css">
 <style>
   :root{
     --paper:#fbfbfc; --ink:#1d1d1f; --muted:#5c6066; --faint:#8a8f98; --line:#e6e8ec; --code:#f6f7f9;
     --rev:#5fb86a; --rev-dot:#5fb86a; --good:#2f9e44; --stale:#d2873c; --unrev:#e06c75; --partial:#c2b54a; --orphan:#71757e;
     --ed-bg:#1e1f22; --ed-ln:#4b5059; --ed-fg:#bcbec4; --ed-kw:#cf8e6d; --ed-fn:#56a8f5;
     --ed-str:#6aab73; --ed-com:#7a7e85; --ed-dim:#868a91; --ed-edge:#393b40;
-    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --mono:"Maple Mono Variable","Maple Mono",ui-monospace,Menlo,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
   *{box-sizing:border-box}
@@ -159,7 +161,7 @@
       </svg>
       Vidi&nbsp;Vouch
     </span>
-    <nav class="nav"><a class="ghost" href="https://github.com/VidiVouch/vidi">GitHub</a></nav>
+    <nav class="nav"><a class="ghost" href="https://github.com/VidiVouch/vid">GitHub</a></nav>
   </header>
 
   <section class="hero">
@@ -169,10 +171,10 @@
       <b>Vouch with one gesture</b> where you already work, see who reviewed what, and watch a vouch turn
       <b>stale</b> the moment the code drifts. No diagnostics list, no source edits.</p>
     <div class="cta">
-      <a class="btn solid" href="#">Read the design</a>
-      <a class="btn line" href="https://github.com/VidiVouch/vidi">GitHub</a>
+      <a class="btn solid" href="https://github.com/VidiVouch/vid/blob/main/DESIGN.html">Read the design</a>
+      <a class="btn line" href="https://github.com/VidiVouch/vid">GitHub</a>
     </div>
-    <p class="install"><code>npm i -g @vidivouch/vid</code> · <code>cargo install vid</code> · <code>brew install vidivouch/tap/vid</code></p>
+    <p class="install"><code>npx @vidivouch/vid</code> · <code>uv tool install vidivouch</code> · <code>brew install vidivouch/tap/vid</code></p>
   </section>
 
   <div class="ide">
