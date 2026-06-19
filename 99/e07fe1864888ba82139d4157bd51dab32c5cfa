@@ -1,0 +1,19 @@
+index.html
+  s_a8fa6210c93696::t_4612d69c0e7346 307,309-310,312,315,320
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "99e07fe1864888ba82139d4157bd51dab32c5cfa",
+  "prompts": {},
+  "sessions": {
+    "s_a8fa6210c93696": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24ebfcda-4dab-4dd5-a747-111c8939ccbd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Tom Price <tom@tomprice.ca>"
+    }
+  }
+}
