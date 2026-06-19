@@ -40,9 +40,9 @@
   /* ===== embedded UI mockups (scoped under .vidmock; see §12) ===== */
   .mock-fig{margin:1.5rem 0}
   .mock-fig figcaption{font-size:.8rem;color:var(--muted);margin-top:.55rem;text-align:center;line-height:1.45}
-  .vidmock{--rev:#5fb86a;--stale:#d2873c;--unrev:#e06c75;--partial:#c2b54a;--orphan:#71757e;--accent:#3574f0;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 14px 40px -16px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.07)}
+  .vidmock{--rev:#5fb86a;--stale:#d2873c;--unrev:#e06c75;--orphan:#71757e;--accent:#3574f0;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 14px 40px -16px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.07)}
   .vidmock .eye{display:inline-block;vertical-align:middle}
-  .vidmock .rev{color:var(--rev)}.vidmock .stale{color:var(--stale)}.vidmock .unrev{color:var(--unrev)}.vidmock .partial{color:var(--partial)}.vidmock .orphan{color:var(--orphan)}
+  .vidmock .rev{color:var(--rev)}.vidmock .stale{color:var(--stale)}.vidmock .unrev{color:var(--unrev)}.vidmock .orphan{color:var(--orphan)}
   .term{background:#16181d}
   .term .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#1f2229;border-bottom:1px solid #000}
   .term .bar .tl{width:11px;height:11px;border-radius:50%}
@@ -57,7 +57,6 @@
   .ide .tw-head{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #2f3136}
   .ide .tw-head .name{font-weight:700;color:#dfe1e5;font-size:13px}
   .ide .tw-head .sp{flex:1}
-  .ide .tw-head .lens{font-size:11px;color:#9296a0;border:1px solid #3a3d44;border-radius:5px;padding:2px 7px}
   .ide .tw-head .ic{color:#9296a0;width:16px;height:16px}
   .ide .summary{display:flex;align-items:center;gap:10px;padding:7px 12px;border-bottom:1px solid #2f3136;font-size:11.5px;color:#9296a0}
   .ide .meter{flex:1;height:6px;border-radius:3px;background:#2b2d30;overflow:hidden;display:flex}
@@ -188,7 +187,7 @@ A <code>vid</code> review asserts that a named identity reviewed a unit of code 
 <p>A reviewable unit is a <strong>node</strong> in a per-language normalized tree produced by a versioned <code>NormalizationProfile</code>. Each node carries <strong>two independent digests</strong>. <em>This primitive is implementation-language-agnostic — it is an algorithm and a data model, equally expressible in Rust (our choice) as in any language.</em></p>
 <table>
 <tr><th>Digest</th><th>What it is</th><th>Role</th></tr>
-<tr><td><strong>Exact hash</strong></td><td><code>sha256</code> of the canonical alpha-normalized serialization, parameterized by <code>(profileVersion, scopeModelVersion)</code>, sensitive to free-name <em>binding-kind</em></td><td><strong>Identity + freshness.</strong> Strictly <strong>binary</strong> (matches / STALE). The only thing that gates re-review and human coverage.</td></tr>
+<tr><td><strong>Exact hash</strong></td><td><code>sha256</code> of the canonical alpha-normalized serialization, parameterized by <code>(profileVersion, scopeModelVersion)</code>; free-name <em>binding-kind</em> sensitivity is planned (not in v1, §4/§14)</td><td><strong>Identity + freshness.</strong> Strictly <strong>binary</strong> (matches / STALE). The only thing that gates re-review and human coverage.</td></tr>
 <tr><td><strong>Similarity digest</strong></td><td>the multiset of the node's <em>children's</em> exact hashes, stored in the record at review time</td><td><strong>Severity only — advisory.</strong> Never gates anything; drives queue triage and gutter intensity.</td></tr>
 </table>
 <h3>Severity</h3>
@@ -214,7 +213,7 @@ flowchart TD
 <h2 id="scope">4. Alpha-normalization &amp; the scope model</h2>
 <p>Alpha-normalization rewrites a unit's <strong>own name, parameters, and locally-bound names</strong> to positional placeholders, keeping <strong>free names</strong> (called functions, imports, attributes, operators, types). Invariant to rename / param-rename / local-rename / move / reformat; sensitive to literal / called-name / added-param / decorator / control-flow change.</p>
 <div class="callout change"><span class="tag">Parser-agnostic by design</span>Bound/free classification runs against <strong>vid's own versioned canonical scope model</strong>, built on the parse tree — never the parser's built-in scope and never a language's live interpreter. This decision was always parser-agnostic, so it transfers unchanged to Rust + tree-sitter: the parser provides the tree; the profile provides the bindings via a hand-written CST binder keyed on node type. <code>scopeModelVersion</code> is a signed field.</div>
-<div class="callout change"><span class="tag">Forced change · resolved</span>The exact hash is sensitive to free-name <strong>binding-kind transitions</strong> (imported ↔ local-shadow ↔ builtin), closing a lift-and-shift vector where a kept free name is later shadowed/monkeypatched. The hash attests to normalized syntactic shape, not semantics.</div>
+<div class="callout limit"><span class="tag">Planned · not in v1</span>The exact hash is <em>designed</em> to become sensitive to free-name <strong>binding-kind transitions</strong> (imported ↔ local-shadow ↔ builtin), closing a lift-and-shift vector where a kept free name is later shadowed/monkeypatched. <strong>The shipped Rust profile does not yet implement binding-kind sensitivity</strong> (a known v1 simplification, §14): a local rename that shadows a previously-free name reads <strong>STALE</strong> — the safe over-report direction. The hash attests to normalized syntactic shape, not semantics.</div>
 
 <h2 id="profiles">5. Languages &amp; NormalizationProfiles</h2>
 <p><code>vid</code> is built to be <strong>versatile across many languages</strong>. The architecture: <strong>tree-sitter as the universal frontend</strong> — one grammar crate per language (≈any language) — behind a single <code>NormalizationProfile</code> trait. <strong>Adding a language = add a grammar crate + write its profile.</strong> A profile declares: unit node-types, bound/free scope rules (CST binder), ordered/unordered per node-kind, ignore-for-hash, and semantic toggles.</p>
@@ -234,7 +233,7 @@ flowchart TD
 <div class="callout limit"><span class="tag">Accepted limitation</span><strong>Extract-method / cross-function move</strong> loses the review. Mitigated by the same non-authoritative suggestion (diff old child-multiset against nearby new units); never auto-attached.</div>
 
 <h2 id="record">7. The record</h2>
-<p>Each record is an <strong>in-toto Statement</strong>, DSSE-envelope-ready from day one, validated against a JSON Schema published at the <code>predicateType</code> URL.</p>
+<p>Each record is an <strong>in-toto Statement</strong>, DSSE-envelope-ready from day one, validated against the in-repo JSON Schemas in <code>schemas/</code> (the source of truth — <code>human-review-v1</code> and <code>tool-review-v1</code>); <code>predicateType</code> is an opaque id whose URL need not resolve.</p>
 <pre><code>{
   "_type": "https://in-toto.io/Statement/v1",
   "subject": [{
@@ -251,7 +250,7 @@ flowchart TD
     "similarityMultiset": [ ],           // child-hash collection at review time (drives severity)
     "profileVersion": "py-1", "scopeModelVersion": "py-scope-1",
     "invarianceGrade": "code",           // code | structural | opaque
-    "signatureState": "self-asserted"    // self-asserted | signed-lenient | signed-verified
+    "signatureState": "self-asserted"    // phase-1 ships self-asserted only; signed-lenient | signed-verified are phase-2 (unshipped)
   }
 }</code></pre>
 <div class="callout change"><span class="tag">in-toto conformance</span><code>subject.digest</code> is a <strong>true content digest only</strong> (<code>{sha256}</code>). The similarity multiset + version fields live in the <code>predicate</code> — a DSSE signature must never freeze a value the engine compares fuzzily.</div>
@@ -269,25 +268,42 @@ flowchart TD
 <div class="callout change"><span class="tag">Monotonicity is enforced, not asserted</span>
 <ul style="margin:.3rem 0 0">
 <li>The union file holds <strong>positive monotone claims only</strong>; absence means "no claim." Policy may only be a positive function of the record set.</li>
-<li>Negative tool "found-issues" live in a <strong>separate append-only findings ledger</strong> (presence-tightens).</li>
-<li>Revocation is a <strong>positive signed REVOKE</strong> referencing the target's content hash, with <strong>revoke-wins</strong> precedence.</li>
-<li><code>vid verify</code> <strong>statically rejects</strong> any <code>trust.toml</code> policy referencing record absence, and dedupes content-identical lines.</li>
+<li>The shipped ledger carries only <strong>reviews + REVOKEs</strong>. A separate negative "found-issues" findings ledger is <strong>not shipped</strong> (a possible later extension).</li>
+<li>Revocation is a <strong>positive REVOKE</strong> referencing the target's content hash, with <strong>revoke-wins</strong> precedence.</li>
+<li><code>trust.toml</code> requirements are <strong>monotone by construction</strong>: an <code>accept</code> row references only <code>&gt;=</code> minimums — there is no negation and no way to reference record <em>absence</em>, so absence is unrepresentable and more/stronger reviews can only flip a unit from fail to pass. <code>vid verify</code> dedupes content-identical lines.</li>
 </ul></div>
 <div class="callout"><span class="tag">Decision #5 — settled</span><strong>Union-merge precedence:</strong> revoke-wins, ordered by Rekor inclusion time (phase 2) or git topology — never the self-asserted timestamp.</div>
 
 <h2 id="trust">10. trust.toml — the policy TCB</h2>
-<p><code>.vid/trust.toml</code> is separate from the facts and is the <strong>trusted computing base root</strong>: standing on <strong>two unmerged axes</strong> (human role: intern/junior/senior; model tier), severity thresholds, custom-criteria registrations, and cargo-vet-style <strong>exemptions</strong>. Applied at report/verify time, so standing is re-scorable without rewriting history.</p>
-<div class="callout change"><span class="tag">Governance</span>A protected path: CODEOWNERS-gated, <strong>author-cannot-approve-own-change</strong>, no same-PR self-promotion or self-exemption; every standing/threshold/exemption change flagged <strong>privileged</strong> by <code>verify</code>. The report shows coverage under both review-time and current standing.</div>
-<h3>Coverage lenses (decision #3)</h3>
-<p>Because the two axes are never merged into one rank, a project defines <strong>named coverage lenses</strong> — monotone requirement expressions over (human role, model tier):</p>
-<pre><code>[lens.human]      # the protected deliverable
-require = "human >= senior"
-[lens.blended]    # axes combined explicitly, never collapsed to one scalar
-require = "human >= junior OR (human >= intern AND model >= T1)"
-[lens.ai]         # informational only
-require = "model >= T1"
-primary = "human"   # which lens supplies the headline number</code></pre>
-<p>Guardrails: lens expressions must be <strong>monotone</strong> (<code>verify</code> rejects any that let deletion raise coverage); <code>ai</code>/<code>blended</code> are distinctly labeled so they never pad the human number; redefining "covered" is a CODEOWNERS-gated change. Each lens can emit an optional weighted single %.</p>
+<p><code>.vid/trust.toml</code> is separate from the facts and is the <strong>trusted computing base root</strong>: an <strong>accept-list policy</strong> over <strong>two unmerged axes</strong> — human role (intern/junior/senior/principal) and a single <code>machine</code> ladder of AI models <em>and</em> 3rd-party tools — plus a <code>[reviewers]</code> identity allowlist, severity thresholds, and cargo-vet-style <strong>exemptions</strong>. It is <strong>applied at report/verify time</strong>, so the bar is re-scorable without rewriting history.</p>
+<div class="callout change"><span class="tag">Governance</span>A protected path: CODEOWNERS-gated, <strong>author-cannot-approve-own-change</strong>, no same-PR self-promotion or self-exemption. The <code>[reviewers]</code> allowlist is the phase-1 anti-forgery gate: a human review whose <code>id</code> is not listed is <strong>recorded but never counted</strong> (surfaced as <em>unverified</em>).</div>
+<h3>The accept-list schema (decision #3)</h3>
+<p>Because the two axes are never merged into one rank, a requirement is just a set of points on the <code>(human, machine)</code> grid — an <code>accept</code> list. Each <code>[[scope]]</code> binds a path glob to an <code>accept</code> list; a row is one point <code>(human &gt;= …, machine &gt;= …)</code>. <strong>Any row passing satisfies the scope</strong> (the list is a disjunction); within a row, <strong>every field is a <code>&gt;=</code> minimum that must hold together</strong> (a conjunction). Where two scopes overlap, both must pass — overlap is <strong>conjunctive</strong> and can only <em>raise</em> the bar.</p>
+<pre><code>[axes]
+human.order   = ["intern", "junior", "senior", "principal"]   # ranked, ascending
+machine.order = ["coderabbit", "cubic", "claude-sonnet-4-6", "claude-opus-4-8"]  # tools AND models, one ladder
+
+[reviewers]                       # the human-identity allowlist (off-list reviews never count)
+"alice@acme.com" = "principal"
+"bob@acme.com"   = "intern"
+
+[[scope]]                         # billing needs a principal AND opus (one row, two minimums)
+path   = "src/billing/**"
+accept = [ { human = "principal", machine = "claude-opus-4-8" } ]
+
+[[scope]]                         # dashboards: any of these rows passes (a disjunction)
+path   = "src/dashboards/**"
+accept = [ { human = "intern" }, { machine = "coderabbit" } ]
+
+default = [ { human = "intern" } ]   # the bar for paths matched by no scope (else: any known human)
+
+[[exemptions]]                    # cargo-vet-style: deliberately excluded from "unreviewed"
+unit   = "repo+legacy.rs::shim"
+reason = "audited out-of-band; deprecated"
+
+[severity]
+major = 0.25                      # advisory only — minor &lt; 25% changed · major &gt;= 25%</code></pre>
+<p>Requirements are <strong>monotone by construction</strong>: an <code>accept</code> row references only <code>&gt;=</code> minimums, with no negation and no way to reference record <em>absence</em> — there is no expression parser and nothing to "reject," so absence is unrepresentable and more/stronger reviews can only flip a unit from fail to pass. Redefining "covered" (editing axes, reviewers, scopes, or exemptions) is a CODEOWNERS-gated change.</p>
 
 <h2 id="signing">11. Signing seam</h2>
 <p>Phase 2 = DSSE + Sigstore/gitsign (keyless OIDC → Fulcio short-lived cert → Rekor transparency log). The human/machine boundary is enforced by <strong>separate IdP audiences</strong>. The DSSE subject binds <code>(repo, path, hash, profileVersion, scopeModelVersion)</code> so a verbatim copy into another module doesn't carry the signature.</p>
@@ -296,11 +312,15 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 
 <h2 id="surfaces">12. Surfaces — CLI, SARIF, plugin, GitHub</h2>
 <h3>CLI (<code>vid</code>)</h3>
+<p>Exactly <strong>seven subcommands</strong>; flags exist only on <code>review</code>.</p>
 <ul>
-<li><code>vid report</code> — three buckets (human-reviewed / exempted / unreviewed) × invariance-grade × lane, under review-time and current standing; <code>--lens=human|blended|ai</code>.</li>
-<li><code>vid queue --mine</code> — copy-pasteable opaque unit-ids, triaged by severity.</li>
-<li><code>vid review &lt;id&gt; --ok</code> — defaulted criteria/rigor/lane; echoes the coverage effect. The 10-second path.</li>
-<li><code>vid verify --fail-on=…</code>, <code>vid sarif --diff &lt;base&gt;</code>, <code>vid locate</code>, <code>vid migrate</code>.</li>
+<li><code>vid report</code> — the coverage report: per-unit state (reviewed / under-reviewed / stale / migration-needed / exempt / unreviewed) plus orphans, required-but-absent vouches, and unverified reviews.</li>
+<li><code>vid status</code> — a one-screen coverage pulse.</li>
+<li><code>vid queue</code> — the severity-triaged worklist of everything actionable (the review to-do list).</li>
+<li><code>vid verify</code> — the CI gate: exits non-zero on ORPHAN, exact-hash STALE, or an unmet scoped requirement.</li>
+<li><code>vid review &lt;target&gt;</code> — record a review of a unit at its current shape. <code>--as &lt;id&gt;</code> for a human, <code>--model &lt;api-name&gt;</code> for an AI model, <code>--tool &lt;name&gt;</code> for a 3rd-party tool. Defaults criteria/rigor; echoes the coverage effect.</li>
+<li><code>vid json</code> — emit the versioned <code>vid.json</code> coverage artifact to stdout.</li>
+<li><code>vid sarif</code> — emit per-file SARIF (the gating findings) to stdout.</li>
 </ul>
 <figure class="mock-fig">
 <div class="vidmock term">
@@ -308,96 +328,113 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 <pre><span class="p">❯</span> <span class="cmd">vid report</span>
   <span class="dim">vid 0.1.0 · Vidi Vouch</span>                          <span class="banner">⚠ human coverage self-asserted, unverified</span>
 
-  <span class="key">Human coverage</span>  <span class="dim">lens: human ≥ senior · primary</span>
-    code        <span class="rev bar-fill">███████████</span><span class="dim bar-fill">█████████████████████████</span>  <span class="rev">129</span><span class="dim">/412</span>  31%
-    structural  <span class="rev bar-fill">████</span><span class="dim bar-fill">████████████████████████████████</span>   <span class="rev">12</span><span class="dim">/96</span>   12%
-    opaque      <span class="dim bar-fill">████████████████████████████████████</span>    <span class="orphan">0</span><span class="dim">/34</span>    0%
+  <span class="key">Human coverage (code · self-asserted)</span>
+    <span class="rev">129</span><span class="dim">/412 reviewed</span>   31%
 
-  <span class="key">Lens</span>         <span class="key">code-grade</span>     <span class="dim">— switch with --lens</span>
-    human        129/412  31%   <span class="dim">primary deliverable</span>
-    blended      264/412  64%   <span class="dim">human≥junior OR (intern + model≥T1)</span>
-    ai           201/412  49%   <span class="dim">informational · never human coverage</span>
+  <span class="rev">●</span> 129 reviewed   <span class="stale">●</span> 14 under   <span class="stale">●</span> 46 stale   <span class="dim">●</span> 3 migration   <span class="dim">●</span> 6 exempt   <span class="unrev">●</span> 219 unreviewed   <span class="orphan">●</span> 4 orphan
 
-  <span class="rev">●</span> 129 reviewed   <span class="stale">●</span> 46 stale   <span class="unrev">●</span> 219 unreviewed   <span class="partial">●</span> 14 partial   <span class="orphan">●</span> 4 orphan
-  <span class="dim">→ run</span> <span class="cmd">vid queue</span> <span class="dim">for the 46 stale + actionable units</span>
+  <span class="stale">✗ STALE</span> <span class="tag">[MAJOR]</span> src/lang/python/scope.rs::resolve_bindings   <span class="dim">(was tom@vidivouch.com)</span>
+  <span class="stale">✗ STALE</span> <span class="tag">[minor]</span> src/core/node.rs::NodeTree::children          <span class="dim">(was dana@vidivouch.com)</span>
+  <span class="orphan">○ ORPHAN</span>  src/old/api.rs::deprecated_call  <span class="dim">(reviewed unit no longer present)</span>
 
-<span class="p">❯</span> <span class="cmd">vid queue --mine --lens human</span>
-  <span class="dim">46 actionable · sorted by severity</span>
+  <span class="key">Required reviews not yet present:</span>
+  <span class="stale">▲</span> src/billing/charge.rs::refund  <span class="dim">(gating)</span>
+       <span class="dim">needs [src/billing/**]: human ≥ principal (have senior) + machine ≥ claude-opus-4-8 (have —)</span>
 
-  <span class="stale tag">✗ MAJOR</span>  src/lang/python/scope.rs<span class="dim">:88</span>   <span class="unit">resolve_bindings()</span>     <span class="dim">stale · was tom@vidivouch.com</span>
-  <span class="stale tag">✗ MAJOR</span>  src/core/digest.rs<span class="dim">:142</span>       <span class="unit">alpha_normalize()</span>      <span class="dim">stale · was dana@vidivouch.com</span>
-  <span style="color:#b3a93f" class="tag">⚠ minor</span>  src/core/node.rs<span class="dim">:54</span>          <span class="unit">NodeTree::children()</span>   <span class="dim">stale · reorder-only</span>
-  <span class="unrev tag">○</span>        src/lang/rust/profile.rs<span class="dim">:30</span>  <span class="unit">RustProfile::units()</span>   <span class="dim">unreviewed</span>
-  <span class="unrev tag">○</span>        src/cli/report.rs<span class="dim">:71</span>        <span class="unit">render_lenses()</span>        <span class="dim">unreviewed</span>
-  <span class="dim">… 41 more</span>
+  <span class="banner">⚠ 1 self-asserted human review(s) NOT counted — reviewer not in trust.toml [reviewers]:</span>
+    <span class="dim">· src/core/digest.rs::alpha_normalize</span>
 
-<span class="p">❯</span> <span class="cmd">vid review src/lang/python/scope.rs:88 --ok --rigor read-fully</span>
-  <span class="rev tag">✓ recorded</span>  <span class="dim">human-review/v1</span>  <span class="unit">resolve_bindings()</span>
-    <span class="key">reviewer</span>  tom@vidivouch.com <span style="color:#9296a0">senior</span>   <span class="key">criteria</span> equivalent   <span class="key">rigor</span> read-fully
-    <span class="key">digest</span>    sha256:9f3c1a… <span class="dim">→ .vid/reviews.jsonl (signed-lenient)</span>
-    <span class="key">coverage</span>  human/code <span class="dim">128 →</span> <span class="rev">129</span><span class="dim">/412 · 31%</span>   <span class="dim">queue 46 →</span> 45
+<span class="p">❯</span> <span class="cmd">vid queue</span>
+  <span class="dim">63 actionable · triaged by urgency</span>
 
-<span class="p">❯</span> <span class="cmd">vid verify --diff origin/main</span>
-  <span class="rev">✓</span> changeset clean — <span class="rev">0 stale</span> · <span class="rev">0 orphan</span>  <span class="dim">(src/lang/python/scope.rs)</span>
-  <span class="dim">unreviewed not gated · severity advisory</span>
-  <span class="rev tag">PASS</span> <span class="dim">vid verify · gate: orphan,stale</span></pre>
+  <span class="orphan">○ ORPHAN</span>   src/old/api.rs::deprecated_call  <span class="dim">(reviewed unit gone — re-anchor or revoke)</span>
+  <span class="stale">✗ STALE</span> <span class="tag">[MAJOR]</span> src/lang/python/scope.rs::resolve_bindings  <span class="dim">(re-review)</span>
+  <span class="stale">✗ STALE</span> <span class="tag">[minor]</span> src/core/node.rs::NodeTree::children  <span class="dim">(re-review)</span>
+  <span class="stale">⛔ REQUIRE</span>  src/billing/charge.rs::refund  <span class="dim">(needs a higher-standing review)</span>
+  <span class="stale">▲ UNDER</span>    src/lang/rust/profile.rs::RustProfile::units  <span class="dim">(below required standing)</span>
+  <span class="banner">⚠ UNVERIF</span>  src/core/digest.rs::alpha_normalize  <span class="dim">(reviewer not allowlisted)</span>
+  <span class="unrev">· NEW</span>      src/cli/report.rs::render_report  <span class="dim">(unreviewed)</span>
+  <span class="dim">… 56 more</span>
+
+<span class="p">❯</span> <span class="cmd">vid review src/lang/python/scope.rs::resolve_bindings --as tom@vidivouch.com</span>
+  <span class="rev tag">✓ recorded</span>  human-review  <span class="unit">src/lang/python/scope.rs::resolve_bindings</span>
+    tom@vidivouch.com  ·  sha256:9f3c1a000000…
+    <span class="dim">→ .vid/reviews.jsonl (self-asserted)</span>
+
+<span class="p">❯</span> <span class="cmd">vid verify</span>
+  <span class="rev tag">✓ PASS</span>  vid verify · gate: orphan,stale,scope  (0 stale, 0 orphan, 0 requirement)
+  <span class="dim">unreviewed (unscoped) not gated · severity advisory</span></pre>
 </div>
-<figcaption>The <code>vid</code> CLI — coverage by lens &amp; grade, a severity-sorted queue, an atomic review, and the changeset-scoped CI gate.</figcaption>
+<figcaption>The <code>vid</code> CLI — the coverage report, a severity-triaged queue, an atomic <code>--as</code> human review, and the CI gate.</figcaption>
 </figure>
-<div class="callout"><span class="tag">Decision #1 — settled</span><strong>CI gate:</strong> ORPHAN + exact-hash STALE fail; <strong>severity never gates</strong> (it only prioritizes the queue). <code>--fail-on=orphan,stale</code> to opt stricter.</div>
-<div class="callout"><span class="tag">Decision #4 — settled</span><strong>SARIF vs <code>vid.json</code>:</strong> split. SARIF emits only STALE/ORPHAN findings (changeset-scoped via <code>--diff</code>) for CI/code-scanning; coverage + lane + tier + severity live in a purpose-built <code>vid.json</code> that the plugin and <code>vid report</code> consume.</div>
-<h3>Alternative CLI views <span style="font-size:.72em;color:var(--muted);font-weight:400">— proposed; one becomes the default <code>vid report</code>, the rest are flags</span></h3>
-<p>The transcript above is the session flow; these are three alternative <em>primary presentations</em> of the same <code>vid.json</code>.</p>
+<div class="callout"><span class="tag">Decision #1 — settled</span><strong>CI gate:</strong> ORPHAN, exact-hash STALE, <em>or</em> an unmet scoped requirement fail; the printed label is <code>gate: orphan,stale,scope (N stale, N orphan, N requirement)</code>. <strong>Severity never gates</strong> (it only prioritizes the queue). A malformed/unreadable ledger fails closed.</div>
+<div class="callout"><span class="tag">Decision #4 — settled</span><strong>SARIF vs <code>vid.json</code>:</strong> split. SARIF emits the gating findings (4 rules: <code>vid/stale</code> error, warning when minor; <code>vid/orphan</code> error; <code>vid/requirement</code> error, gating; <code>vid/under-reviewed</code> note) for CI/code-scanning; coverage + lane + severity + each unit's <code>missing</code> shortfall live in a purpose-built <code>vid.json</code> that the plugin and <code>vid report</code> consume.</div>
+<h3>The two machine outputs &amp; their versions</h3>
+<p>Both artifacts are versioned via <strong>embedded strings</strong> (there is no separate <code>vid.json</code>/SARIF JSON Schema file — <code>schemas/</code> holds only the two record envelopes). <code>vid.json</code> carries a top-level <code>schemaVersion = "vid.json/v2"</code>; SARIF stays at version <code>2.1.0</code> and carries its vid contract separately in <code>runs[0].properties.vidSchemaVersion = "vid-sarif/v1"</code>.</p>
+<pre><code>{
+  "schemaVersion": "vid.json/v2",
+  "lane": "human",
+  "summary": {
+    "total": 412, "reviewed": 129, "underReviewed": 14, "stale": 46,
+    "migrationNeeded": 3, "exempt": 6, "unreviewed": 219,
+    "orphan": 4, "requirementFailures": 1, "unverified": 1
+  },
+  "units": [{
+    "address":  "src/lang/python/scope.rs::resolve_bindings",
+    "file":     "src/lang/python/scope.rs",
+    "qualpath": "resolve_bindings",
+    "state":    "stale",          // reviewed | under-reviewed | stale | migration-needed | exempt | unreviewed
+    "reviewer": "tom@vidivouch.com",
+    "severity": "major",          // nullable: "none" | "minor" | "major" — advisory, absent (null) on non-stale units
+    "missing":  []                // per failing scope: { scope, options:[ [ {axis,required,present} ] ] }
+  }],
+  "orphans": [ "src/old/api.rs::deprecated_call" ],
+  "requirementFailures": [ "src/billing/charge.rs::refund" ],
+  "unverified": [ "src/core/digest.rs::alpha_normalize" ]   // off-allowlist human reviews — recorded, never counted
+}</code></pre>
+<h3>Presentation explorations <span style="font-size:.72em;color:var(--muted);font-weight:400">— design sketches of how the same <code>vid.json</code> could render; not shipped flags</span></h3>
+<p>The transcript above is the shipped session flow. These are <em>design explorations</em> of alternative presentations over the same <code>vid.json</code> — a foldable tree and a changeset-scoped view. They are not subcommands or flags in v1 (the shipped CLI is the seven commands above); they are kept as a roadmap for the IDE surfaces and a future GitHub PR comment.</p>
 <figure class="mock-fig">
 <div class="vidmock term">
-  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid report --tree</span></div>
-<pre><span class="p">❯</span> <span class="cmd">vid report --tree --lens human</span>
-  <span class="dim">129/412 reviewed · 31% · lens: human ≥ senior</span>
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">presentation sketch — foldable tree</span></div>
+<pre><span class="dim">129/412 reviewed · 31% · human (code · self-asserted)</span>
 
   <span class="rev">▾</span> src/core                 <span class="rev">3</span><span class="dim">/5</span>
-    <span class="rev">●</span> NodeTree::children       <span class="dim">h tom · senior</span>
+    <span class="rev">●</span> NodeTree::children       <span class="dim">tom · senior</span>
     <span class="stale">●</span> alpha_normalize          <span class="stale">STALE·MAJOR</span> <span class="dim">was tom</span>
     <span class="unrev">○</span> severity_bucket          <span class="dim">unreviewed</span>
   <span class="stale">▾</span> src/lang/python            <span class="rev">1</span><span class="dim">/4</span>
     <span class="stale">●</span> scope · resolve_bindings <span class="stale">STALE·MAJOR</span>
-    <span class="partial">◐</span> PythonProfile            <span class="partial">2/3 partial</span>
+    <span class="stale">●</span> PythonProfile            <span class="stale">UNDER</span> <span class="dim">below required standing</span>
   <span class="unrev">▸</span> src/lang/rust              <span class="unrev">0</span><span class="dim">/6</span>
   <span class="rev">▾</span> README.md                  <span class="rev">2</span><span class="dim">/3</span>
     <span class="orphan">●</span> § Old API                <span class="orphan">ORPHAN</span></pre>
 </div>
-<figcaption><strong>CLI·A — tree</strong> (<code>vid report --tree</code>): the editor sidebar in the terminal — file → unit coverage, status-coloured, foldable. Best for "where are the gaps?"</figcaption>
+<figcaption><strong>Sketch A — foldable tree</strong> (a future IDE/TUI rendering): file → unit coverage, status-coloured, foldable. Best for "where are the gaps?" Not a shipped CLI flag.</figcaption>
 </figure>
 <figure class="mock-fig">
 <div class="vidmock term">
-  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid report --diff origin/main</span></div>
-<pre><span class="p">❯</span> <span class="cmd">vid report --diff origin/main</span>
-  <span class="dim">changeset · 7 units touched · the un-reviewed-by-a-human report</span>
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">presentation sketch — changeset scope (roadmap)</span></div>
+<pre><span class="dim">changeset · 7 units touched · the un-reviewed-by-a-human report</span>
 
   <span class="rev">●</span> 5 human-reviewed   <span class="stale">●</span> 1 stale   <span class="unrev">●</span> 1 unreviewed
   <span class="key">human ≥ senior</span>  5/7   <span class="rev">+3 this changeset</span>
-  <span class="key">blended</span>       7/7
 
   <span class="stale">✗</span> src/lang/python/scope.rs  <span class="unit">resolve_bindings</span>  <span class="stale">STALE</span> <span class="dim">was tom@ senior</span>
   <span class="unrev">○</span> src/core/digest.rs        <span class="unit">alpha_normalize</span>   <span class="dim">unreviewed · new</span>
-  <span class="dim">→ a human has not reviewed 2 of 7 changed units</span>
-  <span class="rev tag">PASS</span> <span class="dim">gate: orphan,stale — 0 orphan, 0 exact-stale</span></pre>
+  <span class="dim">→ a human has not reviewed 2 of 7 changed units</span></pre>
 </div>
-<figcaption><strong>CLI·B — changeset</strong> (<code>vid report --diff &lt;base&gt;</code>): the literal "un-reviewed report" scoped to a diff — the same view the GitHub PR comment renders. Best for review-before-merge.</figcaption>
+<figcaption><strong>Sketch B — changeset scope</strong> (a roadmap surface, not a v1 flag): the "un-reviewed report" scoped to a diff — the shape a future GitHub PR comment would render. Best for review-before-merge.</figcaption>
 </figure>
+<p>The shipped at-a-glance command is <code>vid status</code> — a one-screen pulse: human coverage, the under/stale/unreviewed/orphan/req-fail counts, all over the same <code>vid.json</code>.</p>
 <figure class="mock-fig">
 <div class="vidmock term">
   <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid status</span></div>
 <pre><span class="p">❯</span> <span class="cmd">vid status</span>
-  <span class="dim">vid 0.1.0 · Vidi Vouch</span>                       <span class="banner">⚠ self-asserted, unverified</span>
-
-  <span class="key">human  </span> <span class="rev bar-fill">███████████</span><span class="dim bar-fill">█████████████████████████</span>  31%  <span class="dim">129/412</span>
-  <span class="key">blended</span> <span class="rev bar-fill">██████████████████████</span><span class="dim bar-fill">██████████████</span>  64%
-  <span class="key">trend  </span> <span class="rev">▁▂▂▃▄▅▆▇</span>  <span class="dim">+7 units this week</span>
-
-  <span class="key">top stale</span>  resolve_bindings · alpha_normalize · NodeTree::children
-  <span class="key">queue    </span>  <span class="stale">46 actionable</span>  <span class="dim">→ vid queue --mine</span></pre>
+  <span class="dim">vid 0.1.0 · Vidi Vouch</span>   <span class="banner">⚠ human coverage self-asserted, unverified</span>
+  <span class="dim">human 129/412 (31%)   under 14   stale 46   unreviewed 219   orphan 4   req-fail 1</span></pre>
 </div>
-<figcaption><strong>CLI·C — dashboard</strong> (<code>vid status</code>): one-screen pulse — coverage bars, a <strong>review-coverage trend</strong> sparkline (terminal-side trends), top stale, queue size. Best as the at-a-glance default.</figcaption>
+<figcaption><strong><code>vid status</code></strong> — the shipped one-screen pulse: human coverage and the actionable counts (under / stale / unreviewed / orphan / req-fail).</figcaption>
 </figure>
 <h3>Editor integrations</h3>
 <p>Both the <strong>JetBrains / IntelliJ</strong> plugin (id <code>com.vidivouch.vid</code>) and a <strong>VS Code</strong> extension <strong>shell out to the <code>vid</code> binary</strong> and render the same <code>vid.json</code> coverage + per-file SARIF — implementation-language-agnostic, in lockstep. The "ViD" eye is the shared mark. The settled <strong>spine</strong> is a coverage <em>sidebar / tool-window tree</em> for the overview <strong>+ inline inlay hints</strong> for in-flow provenance; the <strong>Vouch action lives on the code</strong> (the standardized <em>Gutter Vouch</em> gesture), never in a diagnostics/Problems list. <strong>Xcode</strong> joins as a <em>Source Editor Extension</em> (commands only — Xcode exposes no gutter/sidebar API). Detailed option mockups — a VS Code coverage webview, a commit-time gate, cross-editor "Review Mode" — live in <code>editor-plugin-designs.html</code>.</p>
@@ -418,13 +455,12 @@ primary = "human"   # which lens supplies the headline number</code></pre>
     <div class="tw-head">
       <svg class="eye" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="11" r="7.5" fill="none" stroke="#cfd2d8" stroke-width="3.4"/><circle cx="14.5" cy="13.5" r="3" fill="#cfd2d8"/></svg>
       <span class="name">Vid</span><span class="sp"></span>
-      <span class="lens">human ▾</span>
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v4h-4"/></svg>
       <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
     </div>
     <div class="summary">
       <span><b style="color:#cdd0d6">129</b> / 412 reviewed</span>
-      <span class="meter"><i style="width:31%;background:#5fb86a"></i><i style="width:11%;background:#d2873c"></i><i style="width:4%;background:#c2b54a"></i></span>
+      <span class="meter"><i style="width:31%;background:#5fb86a"></i><i style="width:11%;background:#d2873c"></i><i style="width:4%;background:#e06c75"></i></span>
       <span>code · human</span>
     </div>
     <div class="tree">
@@ -434,11 +470,11 @@ primary = "human"   # which lens supplies the headline number</code></pre>
         <div class="row indent"><span class="sdot" style="background:var(--unrev)"></span><span class="unit">severity_bucket</span><span class="rmeta">unreviewed</span></div>
       <div class="row"><span class="tw-twist">▾</span><span class="file">src/lang/python</span><span class="count">1 / 4</span></div>
         <div class="row indent"><span class="sdot" style="background:var(--stale)"></span><span class="unit">scope.rs · resolve_bindings</span><span class="rmeta"><span class="sev major">STALE·MAJOR</span></span></div>
-        <div class="row indent"><span class="sdot" style="background:var(--partial)"></span><span class="unit">PythonProfile</span><span class="rmeta"><span class="glyph">2/3</span>partial</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--stale)"></span><span class="unit">PythonProfile</span><span class="rmeta"><span class="sev" style="color:var(--stale)">UNDER</span><span class="reviewer">below required standing</span></span></div>
         <div class="row indent"><span class="sdot" style="background:var(--unrev)"></span><span class="unit">canonicalize</span><span class="rmeta">unreviewed</span></div>
       <div class="row"><span class="tw-twist">▸</span><span class="file">src/lang/rust</span><span class="count">0 / 6</span></div>
       <div class="row"><span class="tw-twist">▾</span><span class="file">README.md</span><span class="count">2 / 3</span></div>
-        <div class="row indent"><span class="sdot" style="background:var(--rev)"></span><span class="unit">§ Install</span><span class="rmeta"><span class="glyph" title="tool lane">ai</span>coderabbit · T2</span></div>
+        <div class="row indent"><span class="sdot" style="background:var(--rev)"></span><span class="unit">§ Install</span><span class="rmeta"><span class="glyph" title="machine reviewer">tool</span>coderabbit</span></div>
         <div class="row indent"><span class="sdot" style="background:var(--orphan)"></span><span class="unit">§ Old API</span><span class="rmeta"><span class="sev" style="color:var(--orphan)">ORPHAN</span></span></div>
     </div>
   </div>
@@ -450,7 +486,7 @@ primary = "human"   # which lens supplies the headline number</code></pre>
     <svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
   </div>
 </div>
-<figcaption>JetBrains "Vid" tool window — coverage tree by file → unit, status-coloured, with lane (<code>h</code> human / <code>ai</code> tool) and tier glyphs, severity, a lens selector, and the eye on the right rail.</figcaption>
+<figcaption>JetBrains "Vid" tool window — coverage tree by file → unit, status-coloured, with the human reviewer or machine reviewer (model/tool) name, advisory severity, and the eye on the right rail.</figcaption>
 </figure>
 
 <figure class="mock-fig">
@@ -507,7 +543,7 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 </figure>
 
 <h3>Plugin settings — local presentation vs governed trust</h3>
-<p>The plugins expose settings split by blast radius. <strong>Review-state colours are local &amp; live</strong> — per-editor presentation, with project defaults in committed <code>.vid/config</code>. <strong>Trust policy is governed</strong>: editing standing, lenses, thresholds, or exemptions does <em>not</em> apply locally — it opens a <strong>pull request</strong> against <code>.vid/trust.toml</code> (CODEOWNERS-gated, author-can't-approve-own-change), preserving the §10 TCB guarantees. The plugin <em>shows</em> the effective policy; it never silently rewrites it.</p>
+<p>The plugins expose settings split by blast radius. <strong>Review-state colours are local &amp; live</strong> — per-editor presentation, with project defaults in committed <code>.vid/config</code>. <strong>Trust policy is governed</strong>: editing the axes, reviewers, scopes, thresholds, or exemptions does <em>not</em> apply locally — it opens a <strong>pull request</strong> against <code>.vid/trust.toml</code> (CODEOWNERS-gated, author-can't-approve-own-change), preserving the §10 TCB guarantees. The plugin <em>shows</em> the effective policy; it never silently rewrites it.</p>
 
 <figure class="mock-fig">
 <div class="vidmock set">
@@ -518,34 +554,33 @@ primary = "human"   # which lens supplies the headline number</code></pre>
       <div class="crow"><span class="sw" style="background:#5fb86a"></span><span class="clabel">reviewed</span><span class="hex">#5FB86A</span></div>
       <div class="crow"><span class="sw" style="background:#d2873c"></span><span class="clabel">stale</span><span class="hex">#D2873C</span></div>
       <div class="crow"><span class="sw" style="background:#e06c75"></span><span class="clabel">unreviewed</span><span class="hex">#E06C75</span></div>
-      <div class="crow"><span class="sw" style="background:#c2b54a"></span><span class="clabel">partial</span><span class="hex">#C2B54A</span></div>
       <div class="crow"><span class="sw" style="background:#71757e"></span><span class="clabel">orphan</span><span class="hex">#71757E</span></div>
       <div class="crow"><span class="clabel" style="width:92px;color:#8a8f98;font-size:11px">severity</span><span class="sw" style="background:#b3a93f"></span><span class="hex">minor</span><span class="sw" style="background:#d2873c"></span><span class="hex">major</span></div>
       <div class="note">Stored per-editor. Project defaults live in <span class="mono">.vid/config</span> (committed); your edits override locally.</div>
     </div>
     <div class="grp">
-      <div class="gh">Trust &amp; lenses <span class="tagm gov">governed · .vid/trust.toml</span></div>
+      <div class="gh">Trust policy <span class="tagm gov">governed · .vid/trust.toml</span></div>
       <div class="banner2"><span>⚠</span><span>Trust policy is the project's TCB. Edits don't apply locally — they open a <b>pull request</b> against <span class="mono">.vid/trust.toml</span> (CODEOWNERS-gated; you can't approve your own change).</span></div>
-      <div class="kv"><span class="k">Human standing</span><span class="chip">intern</span><span class="chip">junior</span><span class="chip"><b>senior</b></span></div>
-      <div class="kv"><span class="k">Model tiers</span><span class="chip">opus-4.8 · <b>T1</b></span><span class="chip">gpt-5 · T1</span><span class="chip">sonnet-4.6 · T3</span></div>
-      <div class="kv"><span class="k">Lens · human</span><span class="mono">human ≥ senior</span><span class="prim">PRIMARY</span></div>
-      <div class="kv"><span class="k">Lens · blended</span><span class="mono">human ≥ junior OR (intern + model ≥ T1)</span></div>
-      <div class="kv"><span class="k">Lens · ai</span><span class="mono">model ≥ T1</span></div>
+      <div class="kv"><span class="k">Human axis</span><span class="chip">intern</span><span class="chip">junior</span><span class="chip"><b>senior</b></span><span class="chip">principal</span></div>
+      <div class="kv"><span class="k">Machine axis</span><span class="chip">coderabbit</span><span class="chip">cubic</span><span class="chip">sonnet-4.6</span><span class="chip"><b>opus-4.8</b></span></div>
+      <div class="kv"><span class="k">Reviewers</span><span class="mono">alice@ → principal · bob@ → intern</span></div>
+      <div class="kv"><span class="k">Scope · billing</span><span class="mono">human ≥ principal AND machine ≥ opus</span></div>
+      <div class="kv"><span class="k">Default</span><span class="mono">human ≥ intern</span></div>
       <div class="kv"><span class="k">Severity</span><span class="mono">minor &lt; 25% changed · major ≥ 25%</span></div>
       <div class="btn">⤴ Propose change → PR</div>
     </div>
   </div>
 </div>
-<figcaption>Plugin settings — colours edit locally &amp; live; the governed trust policy (standing, lenses, thresholds) is shown read-only and edits route through a PR against <code>.vid/trust.toml</code>.</figcaption>
+<figcaption>Plugin settings — colours edit locally &amp; live; the governed trust policy (axes, reviewers, scopes, thresholds) is shown read-only and edits route through a PR against <code>.vid/trust.toml</code>.</figcaption>
 </figure>
 
 <h3>GitHub integration</h3>
 <p><code>vid</code>'s output is the "un-reviewed report," so the PR is where it lands. Five planes, each opt-in and forgery-resistant — and <strong>none edits your source</strong>: a <code>/vouch</code> appends a signed in-toto Statement to the in-repo <code>.vid/reviews.jsonl</code> ledger (a data file keyed by content digest), exactly as the CLI does. It is neither a code edit nor a bolted-on service — it is the same in-repo provenance layer, now reachable from the PR; the only external component is the phase-2 Sigstore/Rekor transparency log that anchors the signature.</p>
 <table>
 <tr><th>Plane</th><th>Mechanism</th><th>Behaviour</th></tr>
-<tr><td><strong>CI gate</strong></td><td>Action runs <code>vid verify --diff origin/&lt;base&gt;</code>; required check</td><td>Fails only on orphan + exact-hash stale (decision #1); severity advisory. Pairs with the §2 protected-branch prerequisite.</td></tr>
+<tr><td><strong>CI gate</strong></td><td>Action runs <code>vid verify</code>; required check</td><td>Fails on orphan, exact-hash stale, or an unmet scoped requirement (decision #1); severity advisory. Pairs with the §2 protected-branch prerequisite.</td></tr>
 <tr><td><strong>Inline findings</strong></td><td>SARIF → code scanning</td><td>Stale/orphan annotated on changed hunks — same surface as CodeQL, no Problems-style dilution.</td></tr>
-<tr><td><strong>Un-reviewed report</strong></td><td>Sticky PR comment, updated per push</td><td>Per-lens human-coverage delta — "what a human has / hasn't reviewed here" (renders the CLI·B view).</td></tr>
+<tr><td><strong>Un-reviewed report</strong></td><td>Sticky PR comment, updated per push</td><td>Human-coverage delta — "what a human has / hasn't reviewed here" (renders the changeset-scope sketch).</td></tr>
 <tr><td><strong>Vouch from GitHub</strong></td><td><code>/vouch &lt;unit&gt;</code> → GitHub App</td><td><strong>Opt-in, default none</strong> (mirrors the commit gate). Attributed to the commenting reviewer; appends to <code>.vid/reviews.jsonl</code>; merging never auto-vouches.</td></tr>
 <tr><td><strong>Identity &amp; signing</strong></td><td>GitHub OIDC → Sigstore (Fulcio/Rekor)</td><td>A <code>/vouch</code> counts only if bound to a reviewer identity with standing in <code>.vid/trust.toml</code> (itself CODEOWNERS-governed); signed keyless per §11.</td></tr>
 </table>
@@ -619,8 +654,8 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 
 <figure class="mock-fig">
 <div class="vidmock term">
-  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid matrix — interactive</span></div>
-<pre><span class="dim">vid matrix · src/billing/**</span>          <span class="key">lens human⋈machine</span>   <span class="dim">[tab] scope  [/] filter  [t] time</span>
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">matrix TUI — roadmap (not in v1)</span></div>
+<pre><span class="dim">matrix · src/billing/**</span>          <span class="key">human ⋈ machine</span>   <span class="dim">[tab] scope  [/] filter  [t] time</span>
 ┌─ <span class="key">human</span> ───────────────────────────────────────────────────────────┐
 │ principal    ·      ·      ·    <span class="rev">◆3</span>          <span class="dim">◆ pass · size = units</span>      │
 │ senior       ·      ·      ·    <span class="stale">▴1</span>                                  │
@@ -630,7 +665,7 @@ primary = "human"   # which lens supplies the headline number</code></pre>
  <span class="dim">cell</span> intern×crab · 1 unit                         <span class="rev">3</span><span class="dim">/8 pass ·</span> <span class="rev">▁▂▃▄▅</span> <span class="dim">+3/wk</span>
  <span class="rev">▸</span> <span class="unit">refund()</span>  <span class="dim">needs</span> human ≥ <span class="key">principal</span> + machine ≥ <span class="key">opus</span>   <span class="dim">[⏎] vouch  [o] open</span></pre>
 </div>
-<figcaption><strong>CLI — an interactive TUI is the hero, not static ASCII.</strong> <code>vid matrix</code> opens a navigable grid: arrow keys move the cursor cell-to-cell, the footer shows that cell's units and the exact gap, <kbd>⏎</kbd> vouches in place and the dot animates into the region, <kbd>/</kbd> filters by path, <kbd>t</kbd> scrubs history. Cells are <strong>truecolor heat</strong> (density); on graphics-capable terminals (kitty/iTerm2/Sixel) it renders the SVG above <em>inline</em>; unit rows are <strong>OSC-8 hyperlinks</strong> that open <code>$EDITOR</code> at the unit. Non-TTY / piped / CI degrades to a static truecolor heatmap (then plain ASCII) plus the per-unit shortfall — so <code>vid report --matrix</code> always has something faithful to print.</figcaption>
+<figcaption><strong>Roadmap — an interactive TUI is the hero, not static ASCII (not a v1 subcommand).</strong> The envisioned matrix TUI opens a navigable grid: arrow keys move the cursor cell-to-cell, the footer shows that cell's units and the exact gap (from the same <code>missing</code> shortfall <code>vid report</code> already prints), <kbd>⏎</kbd> vouches in place and the dot animates into the region, <kbd>/</kbd> filters by path, <kbd>t</kbd> scrubs history. Cells are <strong>truecolor heat</strong> (density); on graphics-capable terminals (kitty/iTerm2/Sixel) it renders the SVG above <em>inline</em>; unit rows are <strong>OSC-8 hyperlinks</strong> that open <code>$EDITOR</code> at the unit. Non-TTY / piped / CI degrades to a static truecolor heatmap (then plain ASCII) plus the per-unit shortfall.</figcaption>
 </figure>
 
 <figure class="mock-fig">
@@ -654,26 +689,26 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 <div class="callout"><span class="tag">One model, rendered to each ceiling</span>All three read the same <code>vid.json</code> (each unit's state + its <code>missing</code> shortfall: scope → <code>accept</code> options → <code>{axis, required, present}</code> gaps) over the <code>trust.toml</code> axes. They are not the same picture down-rezzed — they are the <em>best</em> picture each medium can draw: a live SVG with a time-scrubber on the web, a navigable truecolor TUI (with inline graphics) in the terminal, and a code-linked panel with drag-to-vouch in the editor.</div>
 
 <h2 id="report">13. The un-reviewed report</h2>
-<div class="callout"><span class="tag">Decision #3 — settled</span><strong>Stratify by invariance grade (code/structural/opaque) and lane</strong> — the honesty floor — then read through configurable named lenses (§10). Code-grade <em>human-lane</em> coverage under the <code>primary</code> lens is the headline; prose/markup/opaque and the AI/blended lenses are separate, distinctly-labeled axes that can never pad the human number.</div>
-<p>Three buckets (reviewed / exempted / unreviewed), under both review-time and current standing. The headline says "code-grade units a verified human reviewed"; it does <em>not</em> claim understanding or correctness, and (phase 1) carries the unverified-identity banner.</p>
+<div class="callout"><span class="tag">Decision #3 — settled</span><strong>Stratify by invariance grade (code/structural/opaque) and lane</strong> — the honesty floor — then score against the <code>trust.toml</code> accept-list (§10). Code-grade <em>human-lane</em> coverage is the headline; prose/markup/opaque grades and the machine lane (models + tools) are separate, distinctly-labeled — a machine review can never pad the human number, and an off-allowlist human review is recorded but <strong>never counted</strong> (surfaced as <em>unverified</em>).</div>
+<p>Per-unit coverage states are <strong>reviewed / under-reviewed / stale / migration-needed / exempt / unreviewed</strong>, plus orphans and required-but-absent vouches. The accept-list is <strong>applied at report/verify time</strong>, so the bar is re-scorable without rewriting history. The headline says "code-grade units a verified human reviewed"; it does <em>not</em> claim understanding or correctness, and (phase 1) carries the unverified-identity banner.</p>
 
 <h2 id="limits">14. Known limitations &amp; residual blind spots</h2>
 <div class="callout limit"><span class="tag">Accepted</span><strong>Extract-method / cross-function move</strong> loses the review; mitigated by a non-authoritative "may have moved here" suggestion.</div>
 <div class="callout limit"><span class="tag">Accepted</span><strong>Prose weak-invariance</strong> — prose has no behavior, so any content change re-triggers; alpha-normalization disabled for prose, sentence-grained similarity, labeled structural/opaque so it never pads code coverage.</div>
-<div class="callout limit"><span class="tag">Accepted</span><strong>Free-name rebinding</strong> — mitigated (not eliminated) by binding-kind sensitivity; the hash attests to syntactic shape, not semantics.</div>
+<div class="callout limit"><span class="tag">Accepted</span><strong>Free-name rebinding</strong> — designed to be mitigated (not eliminated) by binding-kind sensitivity (§4); <strong>the v1 Rust profile does not yet implement it</strong>, so a local rename that shadows a free name reads STALE (the safe over-report direction). The hash attests to syntactic shape, not semantics.</div>
 <div class="callout limit"><span class="tag">Accepted</span><strong>Stolen interactive human session</strong> — an insider/agent with a live human OIDC session can sign as that human even in phase 2. Irreducible without per-review hardware attestation.</div>
 
 <h2 id="versioning">15. Versioning &amp; migration</h2>
-<p>A <code>profileVersion</code>/<code>scopeModelVersion</code>/canonicalizer bump is an <strong>additive, auditable event</strong>, never a silent re-hash. Per-version hashers are retained; a version mismatch is <strong>MIGRATION-NEEDED</strong> (advisory), never STALE/FAIL. <code>vid migrate</code> writes new positive records citing the old, so coverage is preserved monotonically and nothing silently flips reviewed → unreviewed.</p>
+<p>A <code>profileVersion</code>/<code>scopeModelVersion</code>/canonicalizer bump is an <strong>additive, auditable event</strong>, never a silent re-hash. Per-version hashers are retained; a version mismatch surfaces as the <strong>migration-needed</strong> state (advisory), never STALE/FAIL. Migration writes new positive records citing the old, so coverage is preserved monotonically and nothing silently flips reviewed → unreviewed.</p>
 
 <h2 id="impl">16. Implementation &amp; distribution (Rust)</h2>
 <p><strong>Implementation language: Rust.</strong> Rationale: the <code>ty</code> / Ruff precedent (deep Rust static analysis of Python shipped as a single fast binary on PyPI + npm + brew); a single binary makes modern distribution near-free and kills the Python-freeze epic and the bundled-interpreter syntax ceiling; Ruff-class performance; and the foundational design above is implementation-agnostic, so it transfers unchanged. The Python <code>probatum</code> prototype is retained only as a <strong>reference implementation</strong>.</p>
 <h3>Cargo workspace</h3>
 <table>
 <tr><th>Crate</th><th>Responsibility</th></tr>
-<tr><td><code>vid-core</code></td><td>language-agnostic engine: recursive node + dual digest, Ruzicka multiset severity, ordered/unordered, in-toto records, monotonic store, trust.toml policy + lenses, reconcile</td></tr>
+<tr><td><code>vid-core</code></td><td>language-agnostic engine: recursive node + dual digest, Ruzicka multiset severity, ordered/unordered, in-toto records, monotonic store, trust.toml accept-list policy, reconcile</td></tr>
 <tr><td><code>vid-lang-*</code></td><td>one profile per language behind the <code>NormalizationProfile</code> trait (<code>python</code>, <code>javascript</code>, <code>rust</code>, <code>html</code>, <code>markdown</code>); tree-sitter grammar + CST scope binder + canonicalization list</td></tr>
-<tr><td><code>vid-cli</code></td><td>the <code>vid</code> binary (clap); report/queue/verify/review/sarif/locate/migrate</td></tr>
+<tr><td><code>vid-cli</code></td><td>the <code>vid</code> binary (clap); the seven subcommands: report / status / queue / verify / review / json / sarif</td></tr>
 </table>
 <p>Parsers: <code>tree-sitter</code> + grammar crates (<code>tree-sitter-python/-javascript/-rust/-html</code>); <code>comrak</code> for Markdown; <code>ruff_python_ast</code> available as the Python fidelity-upgrade behind the trait.</p>
 <h3>Distribution — one Cargo project, every channel</h3>
@@ -737,13 +772,13 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 <h2 id="build">18. Build sequence &amp; MVP scope</h2>
 <p>Greenfield Rust workspace, clean core first. The <strong>record envelope is the one irreversible decision</strong>; everything else is replaceable.</p>
 <ol>
-<li><strong>Lock the record envelope</strong> — in-toto Statement (<code>subject.digest={sha256}</code> only; predicate per §7; DSSE-ready); publish the JSON Schema at the predicateType URL.</li>
+<li><strong>Lock the record envelope</strong> — in-toto Statement (<code>subject.digest={sha256}</code> only; predicate per §7; DSSE-ready); the in-repo JSON Schemas in <code>schemas/</code> are the source of truth (<code>predicateType</code> is an opaque id, its URL need not resolve).</li>
 <li><strong><code>vid-core</code> engine</strong> — node tree, exact hash (parameterized), true-multiset Ruzicka Jaccard, ordered/unordered driving both digests, <code>severity = bucket(max(rel,abs))</code> + single-child floor. Tests: <code>{s,s}</code>≠<code>{s}</code>; reorder ⇒ STALE + nonzero severity; one-of-twenty ⇒ MINOR not NONE.</li>
-<li><strong>NormalizationProfile trait + tree-sitter</strong>; first binding profile (Python or Rust) with its own CST scope binder; conditional class ordering; binding-kind sensitivity; pinned <code>scopeModelVersion</code>.</li>
-<li><strong>Monotonic store + verify</strong> — positive-claims-only union JSONL, content-addressed dedupe, separate findings ledger, signed REVOKE (revoke-wins); verify rejects non-monotone policy; treats the file as untrusted. Test: deleting any line can only lower coverage.</li>
+<li><strong>NormalizationProfile trait + tree-sitter</strong>; first binding profile (Python or Rust) with its own CST scope binder; conditional class ordering; pinned <code>scopeModelVersion</code> (binding-kind sensitivity is a planned follow-up, not v1 — §4/§14).</li>
+<li><strong>Monotonic store + verify</strong> — positive-claims-only union JSONL (reviews + REVOKEs), content-addressed dedupe, REVOKE (revoke-wins); policy is monotone by construction (absence is unrepresentable); treats the file as untrusted and fails closed on a malformed ledger. Test: deleting any line can only lower coverage.</li>
 <li><strong>Move/rename reconcile</strong> — complexity floor + repo-global uniqueness + never-reuse-signature + one-keystroke re-confirm; empty-unit collision regression test.</li>
 <li><strong>Signing seam scaffolding</strong> — ship the envelope, identity allowlist, issuer-audience separation, the unverified banner. Phase-1 lenient.</li>
-<li><strong>trust.toml TCB</strong> — two unmerged axes, thresholds, exemptions, lenses, profile-impl hash pin; privileged-change flagging; anti-self-promotion.</li>
+<li><strong>trust.toml TCB</strong> — two unmerged axes, the <code>[reviewers]</code> allowlist, path-scoped accept lists, default, exemptions, severity thresholds; CODEOWNERS-gated; anti-self-promotion.</li>
 <li><strong><code>vid</code> CLI</strong> (clap) — the §12 surface.</li>
 <li><strong>Add JS + Rust profiles</strong> (binding-language binders; self-hosting check).</li>
 <li><strong>HTML + Markdown profiles</strong> (spec tree + injections; comrak container + fenced-code rung ladder).</li>
@@ -754,9 +789,9 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 <h3>Decisions (settled — 2026-06-18)</h3>
 <table>
 <tr><th>#</th><th>Decision</th><th>Resolution</th></tr>
-<tr><td>1</td><td>Does any change to reviewed code fail CI?</td><td>Gate on staleness, severity-blind: STALE + ORPHAN fail; severity never gates (<code>--fail-on</code>)</td></tr>
+<tr><td>1</td><td>Does any change to reviewed code fail CI?</td><td>Gate on staleness, severity-blind: STALE + ORPHAN + unmet scoped requirement fail (<code>gate: orphan,stale,scope</code>); severity never gates</td></tr>
 <tr><td>2</td><td>Docstrings / module constants</td><td>Own leaf units (graded structural)</td></tr>
-<tr><td>3</td><td>Coverage metric</td><td>Stratify by grade + lane; configurable lenses (human/blended/AI) + optional weighted %; code-grade human-lane under <code>primary</code> = headline</td></tr>
+<tr><td>3</td><td>Coverage metric</td><td>Stratify by grade + lane; score against the trust.toml accept-list (2 axes); code-grade human-lane = headline; machine lane &amp; off-allowlist reviews never pad it</td></tr>
 <tr><td>4</td><td>SARIF vs vid.json</td><td>Split — SARIF findings-only, coverage in vid.json</td></tr>
 <tr><td>5</td><td>Union-merge precedence</td><td>Revoke-wins + Rekor/git-topology; never the self-asserted timestamp</td></tr>
 <tr><td>6</td><td>Conditionally-ordered class reorder</td><td>Full STALE for v1; dual-digest reserves a later reorder-only variant</td></tr>
