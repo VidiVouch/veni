@@ -1,0 +1,21 @@
+index.html
+  s_a8fa6210c93696::t_b451707fd4f07b 312-315
+  s_a8fa6210c93696::t_0aeb112ada5484 265,271,274
+  s_a8fa6210c93696::t_b4bd5ca0a1a9d2 385
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "4bdb636a25839dfa5c7b3ff14c0a98d56cd486cb",
+  "prompts": {},
+  "sessions": {
+    "s_a8fa6210c93696": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24ebfcda-4dab-4dd5-a747-111c8939ccbd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Tom Price <tom@tomprice.ca>"
+    }
+  }
+}
