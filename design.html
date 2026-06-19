@@ -551,6 +551,64 @@ primary = "human"   # which lens supplies the headline number</code></pre>
 </table>
 <div class="callout"><span class="tag">Open sub-decision</span>Whether the App commits each <code>/vouch</code> to the PR branch as it happens (visible, immediate) or batches them into the merge commit (no mid-review churn). Both keep records in-repo in <code>.vid/reviews.jsonl</code> and leave source untouched.</div>
 
+<h3>The coverage matrix — required vs present <span style="font-size:.72em;color:var(--muted);font-weight:400">— proposed; one shared picture across CLI, editor &amp; web</span></h3>
+<p>Trust requirements are points on a 2D grid — <strong>human</strong> seniority × <strong>machine</strong> capability (AI models and 3rd-party tools on one ranked ladder, §10). That makes "what's required vs. what a unit actually has" drawable as the <em>same picture</em> everywhere: a unit <strong>passes</strong> iff its strongest <code>(human, machine)</code> sits in the shaded region at-or-above an <code>accept</code> point. Every surface renders the one <code>vid.json</code> — each unit already carries its <code>missing</code> shortfall (the absent vouches), so the matrix and its drill-downs are pure presentation.</p>
+
+<figure class="mock-fig">
+<div class="vidmock term">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vid report --matrix</span></div>
+<pre><span class="p">❯</span> <span class="cmd">vid report --matrix --scope "src/billing/**"</span>
+  <span class="dim">src/billing/**</span>   <span class="rev">▓ pass</span>   <span class="rev">●</span> required   <span class="rev">3</span><span class="dim">/8 units pass</span>
+
+  <span class="key">human</span>
+  principal │   ·      ·      ·     <span class="rev">▓●</span>      <span class="dim">● the bar: principal × opus</span>
+  senior    │   ·      ·      ·      ·
+  junior    │  <span class="unrev">◍2</span>      ·      ·      ·       <span class="dim">◍N  N units sit here…</span>
+  intern    │  <span class="unrev">◍1</span>      ·     <span class="unrev">◍2</span>      ·       <span class="dim">    …below the bar</span>
+            └─────────────────────────────  <span class="key">machine →</span>
+              crab   cubic   sonn   opus
+
+  <span class="stale">▲ 5 below the bar</span>
+       <span class="unit">charge()</span>  <span class="dim">needs</span> human ≥ <span class="key">principal</span> <span class="dim">(have intern)</span> + machine ≥ <span class="key">opus</span> <span class="dim">(have —)</span></pre>
+</div>
+<figcaption><strong>CLI</strong> (<code>vid report --matrix</code>): an ASCII grid per scope — the pass region shaded, the required point ●, units bucketed into cells, and the same per-unit <em>shortfall</em> the textual report already prints. <code>--scope</code> picks one path; bare prints a small-multiples grid.</figcaption>
+</figure>
+
+<figure class="mock-fig">
+<div class="vidmock ide">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">Vidi Vouch · Coverage Matrix — JetBrains tool-window / VS Code webview</span></div>
+<pre>  <span class="key">Coverage Matrix</span>      scope: <span class="unit">src/billing/**</span>  <span class="dim">▾</span>     <span class="dim">lens drives the bar</span>
+
+               crab    cubic   sonnet    opus
+   principal    ·       ·        ·       <span class="rev">●3</span>     <span class="dim">← pass region (shaded)</span>
+   senior       ·       ·        ·        ·
+   junior      <span class="unrev">◍2</span>      ·        ·        ·
+   intern      <span class="unrev">◍1</span>      ·       <span class="unrev">◍2</span>       ·
+
+  <span class="dim">click a cell → the units in it → Gutter Vouch · hover a unit → its gap</span>
+  <span class="key">selected</span>  <span class="unit">charge()</span>   <span class="stale">needs principal + opus</span>   <span class="dim">[ Vouch ⌃⌥V ]</span></pre>
+</div>
+<figcaption><strong>IDE</strong>: the matrix as an interactive panel (JetBrains tool-window / opt-in VS Code webview, alongside the coverage tree). Cells are clickable → the units sitting there → the standard <em>Gutter Vouch</em>; a failing unit's gap shows inline. Xcode (commands-only) falls back to the textual shortfall. The editor's at-caret inlay can show a one-cell "you are here / bar is there" mini-glyph.</figcaption>
+</figure>
+
+<figure class="mock-fig">
+<div class="vidmock ide">
+  <div class="bar"><span class="tl r"></span><span class="tl y"></span><span class="tl g"></span><span class="title">vici · vidivouch.com — web portal</span></div>
+<pre>  <span class="dim">vici ·</span> <span class="key">VidiVouch/vid</span> <span class="dim">· scope</span> src/billing/** <span class="dim">·</span> <span class="key">◷ HEAD</span> <span class="dim">▾</span>
+
+               crab    cubic   sonnet    opus
+   principal    ░       ░        ░       <span class="rev">██3</span>    <span class="dim">██ darker = more units</span>
+   senior       ░       ░        ░        ░       <span class="dim">░  lighter = fewer</span>
+   junior      <span class="stale">▓2</span>      ░        ░        ░       <span class="dim">cell → unit list + vouches</span>
+   intern      <span class="stale">▓1</span>      ░       <span class="stale">▓2</span>       ░       <span class="dim">drag ◷ → matrix over time</span>
+
+  <span class="rev">3</span><span class="dim">/8 pass ·</span> <span class="stale">5 below the bar</span> <span class="dim">·</span> <span class="key">trend</span> <span class="rev">▁▂▃▄▅</span> <span class="dim">+3 this week · org roll-up across repos</span></pre>
+</div>
+<figcaption><strong>Web</strong> (<code>vici</code>): the richest form — a coverage <em>heatmap</em> (cell shade = unit density), the required frontier outlined, click-through to a cell's units and their vouch history, a time-slider that replays the matrix at past commits (the GitHub-like historical view), and an org roll-up across repos. Per-PR: the changed units plotted with what's missing to merge.</figcaption>
+</figure>
+
+<div class="callout"><span class="tag">One model, three renders</span>The grid is never recomputed per surface: <code>vid.json</code> carries each unit's state plus its <code>missing</code> shortfall (scope → accept options → <code>{axis, required, present}</code> gaps), and the axes come from <code>trust.toml</code>. CLI/IDE/web differ only in fidelity — ASCII, interactive panel, heatmap-over-time — so "what passed vs. what's required" reads identically wherever you look.</div>
+
 <h2 id="report">13. The un-reviewed report</h2>
 <div class="callout"><span class="tag">Decision #3 — settled</span><strong>Stratify by invariance grade (code/structural/opaque) and lane</strong> — the honesty floor — then read through configurable named lenses (§10). Code-grade <em>human-lane</em> coverage under the <code>primary</code> lens is the headline; prose/markup/opaque and the AI/blended lenses are separate, distinctly-labeled axes that can never pad the human number.</div>
 <p>Three buckets (reviewed / exempted / unreviewed), under both review-time and current standing. The headline says "code-grade units a verified human reviewed"; it does <em>not</em> claim understanding or correctness, and (phase 1) carries the unverified-identity banner.</p>
