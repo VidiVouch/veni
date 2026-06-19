@@ -1,0 +1,20 @@
+index.html
+  s_a8fa6210c93696::t_13fbf7441fcaca 307,312-313,315-316,318,320-321
+  s_a8fa6210c93696::t_e23b5472252d6f 308-311
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "e13eed73e5f4f7b93b5941bd8af15a9f1dba84cb",
+  "prompts": {},
+  "sessions": {
+    "s_a8fa6210c93696": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24ebfcda-4dab-4dd5-a747-111c8939ccbd",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Tom Price <tom@tomprice.ca>"
+    }
+  }
+}
