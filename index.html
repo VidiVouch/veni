@@ -304,21 +304,20 @@
     </div>
     <figure class="codecard" style="margin:0">
       <figcaption class="cap">.vid/trust.toml</figcaption>
-<pre><span class="c"># axes — your org's stops</span>
+<pre><span class="c"># two axes — your org's stops</span>
 [axes]
-human.order = [<span class="s">"intern"</span>, <span class="s">"principal"</span>]
-model.order = [<span class="s">"claude-sonnet-4-6"</span>, <span class="s">"claude-opus-4-8"</span>]
-tool.known  = [<span class="s">"coderabbit"</span>, <span class="s">"cubic"</span>]
+human.order   = [<span class="s">"intern"</span>, <span class="s">"principal"</span>]
+machine.order = [<span class="s">"coderabbit"</span>, <span class="s">"claude-sonnet-4-6"</span>, <span class="s">"claude-opus-4-8"</span>]
 
-<span class="c"># billing: a principal human AND an opus-class model</span>
+<span class="c"># billing: a principal human AND an opus-class machine</span>
 [[scope]]
 path   = <span class="s">"src/billing/**"</span>
-accept = [{ human = <span class="s">"principal"</span>, model = <span class="s">"claude-opus-4-8"</span> }]
+accept = [{ human = <span class="s">"principal"</span>, machine = <span class="s">"claude-opus-4-8"</span> }]
 
 <span class="c"># dashboards: an intern, or CodeRabbit</span>
 [[scope]]
 path   = <span class="s">"src/dashboards/**"</span>
-accept = [{ human = <span class="s">"intern"</span> }, { tool = <span class="s">"coderabbit"</span> }]</pre>
+accept = [{ human = <span class="s">"intern"</span> }, { machine = <span class="s">"coderabbit"</span> }]</pre>
     </figure>
   </section>
 
