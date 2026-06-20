@@ -717,10 +717,10 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
 </table>
 <p>Parsers: <code>tree-sitter</code> + grammar crates (<code>tree-sitter-python/-javascript/-rust/-html</code>); <code>comrak</code> for Markdown; <code>ruff_python_ast</code> available as the Python fidelity-upgrade behind the trait.</p>
 <h3>Distribution — one Cargo project, every channel</h3>
-<p><strong>cargo-dist</strong> builds per-platform binaries (macOS arm64/x64, Linux x64/arm64, Windows x64) in a CI matrix and publishes them as: npm <code>optionalDependencies</code> packages under <code>@vidivouch/vid</code> (→ <code>npx</code>/<code>bunx</code>/<code>deno</code>), a Homebrew formula, and a shell installer. <strong>maturin</strong> builds the PyPI wheel carrying the same binary (so <code>uv tool install vid</code> / <code>pip install vid</code> work, à la Ruff). The freeze step and the syntax ceiling from the Python-impl plan are gone.</p>
+<p><strong>cargo-dist</strong> builds per-platform binaries (macOS arm64/x64, Linux x64/arm64, Windows x64) in a CI matrix and publishes them as: npm <code>optionalDependencies</code> packages under <code>@vidivouch/vid</code> (→ <code>npx</code>/<code>bunx</code>/<code>deno</code>), a Homebrew formula, and a shell installer. <strong>maturin</strong> builds the PyPI wheel carrying the same binary (so <code>uv tool install vidivouch</code> / <code>pip install vidivouch</code> work, à la Ruff). The freeze step and the syntax ceiling from the Python-impl plan are gone.</p>
 <table>
 <tr><th>Channel</th><th>Audience</th><th>Mechanism</th></tr>
-<tr><td>PyPI (<code>uv tool install vid</code> / <code>pipx</code>)</td><td>Python devs</td><td>maturin wheel (native binary inside)</td></tr>
+<tr><td>PyPI (<code>uv tool install vidivouch</code> / <code>pipx</code>)</td><td>Python devs</td><td>maturin wheel (native binary inside)</td></tr>
 <tr><td>npm / npx / bunx / deno (<code>@vidivouch/vid</code>)</td><td>JS/web devs (who review JS/HTML/MD)</td><td>cargo-dist per-platform pkgs + launcher</td></tr>
 <tr><td>Homebrew tap / direct download</td><td>CLI users</td><td>cargo-dist formula + installer</td></tr>
 </table>
