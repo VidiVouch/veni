@@ -286,6 +286,7 @@
     <div class="cta">
       <a class="btn solid" href="design.html">Read the design</a>
       <a class="btn line" href="https://github.com/VidiVouch/vid">GitHub</a>
+      <a class="btn line" href="design.html#naming">vici platform</a>
     </div>
     <p class="install"><code>npx @vidivouch/vid</code> · <code>uv tool install vidivouch</code> · <code>brew install vidivouch/tap/vid</code><br>
       <span class="run">install <code style="border:none;background:none;padding:0;color:var(--text-2)">vidivouch</code>, run <code style="border:none;background:none;padding:0;color:var(--accent-2)">vid</code></span></p>
@@ -540,6 +541,38 @@ accept = [{ human = <span class="s">"intern"</span> }, { machine = <span class="
           <code>Editor ▸ Vid</code> menu, with <kbd>⌃⌥V</kbd> parity.</p>
       </div>
     </div>
+  </section>
+
+  <!-- Hosted platform — vici (shipped, proprietary commercial layer) -->
+  <section class="exts">
+    <p class="eyebrow eyebrow--accent" style="text-align:center">The hosted platform · vici</p>
+    <h2 style="text-align:center;margin:0 0 6px">Push your coverage. See it across every repo.</h2>
+    <p class="sub">The free <code>vid</code> tool stays MIT. The hosted <b style="color:var(--text);font-weight:600">Vidi Vouch platform</b> is the
+      commercial layer, and it's live: <code>vid push</code> ships your <code>vid.json</code> over an authenticated,
+      tenant-isolated API (<code>POST /api/v1/ingest</code>, per-tenant token) and the portal renders it.</p>
+    <div class="extgrid">
+      <div class="ext">
+        <span class="tag2">SELF-SERVE · COVERAGE</span>
+        <h3>Connect a repo, see coverage</h3>
+        <p>Connect a repository and mint or revoke a CI token from the portal — no admin. Each repo shows its
+          latest-snapshot coverage and per-repo snapshot history.</p>
+      </div>
+      <div class="ext">
+        <span class="tag2">THE REPORT · THE MATRIX</span>
+        <h3>The un-reviewed report &amp; matrix</h3>
+        <p>Every stale, orphaned, under- or un-reviewed unit, worst-first, with the exact CI gate verdict. The
+          two-axis human×machine matrix plots each unit and draws the policy frontier (for repos whose CI emits
+          the v3 <code>axes</code> contract; without it, an honest "awaiting v3" state).</p>
+      </div>
+      <div class="ext">
+        <span class="tag2">ORG · TEAM / ENTERPRISE</span>
+        <h3>Org rollups &amp; paid plans</h3>
+        <p>Cross-repo rollups, reviewer standing, a directory heat-tree, and an embeddable coverage badge. Team and
+          Enterprise plans with tier entitlements bill through Stripe. Managed SSO/RBAC and private Rekor/Fulcio are
+          on the enterprise roadmap.</p>
+      </div>
+    </div>
+    <p class="banner" style="display:flex;width:max-content;margin-left:auto;margin-right:auto">⚠ Phase 1: human coverage is self-asserted and unverified — the platform renders point-in-time coverage, not cryptographic proof.</p>
   </section>
 
   <section class="strip">
