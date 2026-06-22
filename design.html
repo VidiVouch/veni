@@ -7,14 +7,14 @@
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
   mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: {
-    primaryColor: '#f2f4fa', primaryBorderColor: '#6e6bf2', primaryTextColor: '#141a28',
-    lineColor: '#6e6bf2', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace'
+    primaryColor: '#f2f4fa', primaryBorderColor: '#2f9fd8', primaryTextColor: '#141a28',
+    lineColor: '#2f9fd8', fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, monospace'
   } });
 </script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
-  /* Spectral Provenance — cool document chrome (iris accent; amber, never orange, for caution) */
-  :root { --ink:#141a28; --muted:#454d63; --line:#dce0ec; --accent:#4b46c9; --warn:#976b00; --good:#0b8f66; --bg:#fff; --code:#f2f4fa; }
+  /* Cyanotype — cool document chrome (iris/process-cyan accent; amber, never orange, for caution) */
+  :root { --ink:#141a28; --muted:#454d63; --line:#dce0ec; --accent:#1f6fb8; --warn:#976b00; --good:#0b8f66; --bg:#fff; --code:#f2f4fa; }
   * { box-sizing: border-box; }
   body { font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); margin: 0; }
   main { max-width: 50rem; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
@@ -26,7 +26,7 @@
   code { background: var(--code); padding: .1em .35em; border-radius: 4px; font-size: .88em; font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; }
   pre { background: var(--code); padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: .85rem; }
   pre code { background: none; padding: 0; }
-  .callout { border-left: 3px solid var(--accent); background: #f1f1fc; padding: .8rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
+  .callout { border-left: 3px solid var(--accent); background: #eef4fb; padding: .8rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
   .callout.limit { border-color: var(--warn); background: #fbf6e8; }
   .callout.change { border-color: var(--good); background: #eef8f4; }
   .callout .tag { font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display:block; margin-bottom:.2rem; }
@@ -44,8 +44,8 @@
   /* ===== embedded UI mockups (scoped under .vidmock; see §12) ===== */
   .mock-fig{margin:1.5rem 0}
   .mock-fig figcaption{font-size:.8rem;color:var(--muted);margin-top:.55rem;text-align:center;line-height:1.45}
-  /* vid status ramp — canonical Spectral Provenance (amber STALE, never orange) */
-  .vidmock{--rev:#18bf8e;--stale:#f2c12e;--unrev:#5a6376;--orphan:#fb5570;--accent:#3574f0;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 14px 40px -16px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.07)}
+  /* vid status ramp — canonical Cyanotype (amber STALE, never orange) */
+  .vidmock{--rev:#25b59c;--stale:#e6b23e;--unrev:#8a9bb0;--orphan:#ef6f86;--accent:#3574f0;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;width:100%;border-radius:10px;overflow:hidden;box-shadow:0 14px 40px -16px rgba(0,0,0,.5),0 0 0 1px rgba(0,0,0,.07)}
   .vidmock .eye{display:inline-block;vertical-align:middle}
   .vidmock .rev{color:var(--rev)}.vidmock .stale{color:var(--stale)}.vidmock .unrev{color:var(--unrev)}.vidmock .orphan{color:var(--orphan)}
   .term{background:#16181d}
@@ -54,9 +54,9 @@
   .term .tl.r{background:#ff5f57}.term .tl.y{background:#febc2e}.term .tl.g{background:#28c840}
   .term .bar .title{margin-left:8px;color:#6b6f78;font-size:12px}
   .term pre{margin:0;padding:16px 18px 20px;font-size:12px;line-height:1.6;color:#c6c9d1;white-space:pre;overflow-x:auto;background:none;border-radius:0}
-  .term .p{color:#2dd4cf;font-weight:700}.term .cmd{color:#e8eaf0;font-weight:500}
-  .term .dim{color:#5c616c}.term .key{color:#8f8bff}
-  .term .bar-fill{letter-spacing:-1px}.term .banner{color:#f2c12e}.term .tag{font-weight:700}
+  .term .p{color:#76cdec;font-weight:700}.term .cmd{color:#e8eaf0;font-weight:500}
+  .term .dim{color:#5c616c}.term .key{color:#5cc8f5}
+  .term .bar-fill{letter-spacing:-1px}.term .banner{color:#e6b23e}.term .tag{font-weight:700}
   .ide{display:flex;background:#1e1f22;color:#bcbfc7;font-size:13px}
   .ide .tw{flex:1;min-width:0;display:flex;flex-direction:column}
   .ide .tw-head{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #2f3136}
@@ -112,7 +112,7 @@
   .vsc .src{white-space:pre;color:#d4d4d4}
   .vsc .codelens{color:#7c8088;font-size:11px;font-style:italic;padding-left:4px}
   .vsc .codelens .lk{color:#4ea0d6;font-style:normal}
-  .vsc .codelens .vouch{color:#18bf8e;font-style:normal;font-weight:600}
+  .vsc .codelens .vouch{color:#25b59c;font-style:normal;font-weight:600}
   .vsc .kw{color:#569cd6}.vsc .fn{color:#dcdcaa}.vsc .ty{color:#4ec9b0}.vsc .st{color:#ce9178}
   .vsc .status{height:24px;background:#007acc;display:flex;align-items:center;color:#fff;font-size:11.5px}
   .vsc .status .it{display:flex;align-items:center;gap:5px;padding:0 9px;height:100%}
@@ -125,7 +125,7 @@
   .set .grp{margin-bottom:20px}.set .grp:last-child{margin-bottom:0}
   .set .gh{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8a8f98;margin-bottom:11px;display:flex;align-items:center;gap:9px}
   .set .tagm{font-size:9.5px;border:1px solid #3a3d44;border-radius:4px;padding:1px 6px;letter-spacing:.03em;text-transform:none}
-  .set .tagm.local{color:#18bf8e;border-color:#345c39}.set .tagm.gov{color:#f2c12e;border-color:#5c4a33}
+  .set .tagm.local{color:#25b59c;border-color:#345c39}.set .tagm.gov{color:#e6b23e;border-color:#5c4a33}
   .set .crow{display:flex;align-items:center;gap:11px;padding:4px 0}
   .set .sw{width:24px;height:15px;border-radius:3px;border:1px solid rgba(255,255,255,.16);cursor:pointer}
   .set .clabel{width:92px;color:#cdd0d6}
@@ -137,7 +137,7 @@
   .set .kv .k{width:118px;color:#9296a0;flex:none}
   .set .chip{font-size:11px;background:#2b2d30;border:1px solid #3a3d44;border-radius:5px;padding:1px 7px;color:#c6c9d1}
   .set .chip b{color:#dfe1e5}
-  .set .prim{color:#18bf8e;font-weight:700;font-size:9.5px;border:1px solid #345c39;border-radius:4px;padding:1px 6px}
+  .set .prim{color:#25b59c;font-weight:700;font-size:9.5px;border:1px solid #345c39;border-radius:4px;padding:1px 6px}
   .set .btn{margin-top:14px;display:inline-flex;align-items:center;gap:7px;background:#3574f0;color:#fff;border-radius:6px;padding:7px 13px;font-size:12.5px;font-weight:600}
 </style>
 </head>
@@ -465,7 +465,7 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
     </div>
     <div class="summary">
       <span><b style="color:#cdd0d6">129</b> / 412 reviewed</span>
-      <span class="meter"><i style="width:31%;background:#18bf8e"></i><i style="width:11%;background:#f2c12e"></i><i style="width:4%;background:#fb5570"></i></span>
+      <span class="meter"><i style="width:31%;background:#25b59c"></i><i style="width:11%;background:#e6b23e"></i><i style="width:4%;background:#ef6f86"></i></span>
       <span>code · human</span>
     </div>
     <div class="tree">
@@ -510,31 +510,31 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M6 12h12M10 19h4"/></svg></div>
       <div class="side-sub">human · 129 / 412 · code-grade</div>
       <div class="vr"><span class="tw">▾</span><span class="fl">src/core</span><span class="ct">3 / 5</span></div>
-      <div class="vr ind"><span class="sd" style="background:#18bf8e"></span><span class="un">NodeTree::children</span></div>
-      <div class="vr ind"><span class="sd" style="background:#f2c12e"></span><span class="un">alpha_normalize</span><span class="badge" style="color:#f2c12e">STALE</span></div>
-      <div class="vr ind"><span class="sd" style="background:#fb5570"></span><span class="un">severity_bucket</span></div>
+      <div class="vr ind"><span class="sd" style="background:#25b59c"></span><span class="un">NodeTree::children</span></div>
+      <div class="vr ind"><span class="sd" style="background:#e6b23e"></span><span class="un">alpha_normalize</span><span class="badge" style="color:#e6b23e">STALE</span></div>
+      <div class="vr ind"><span class="sd" style="background:#ef6f86"></span><span class="un">severity_bucket</span></div>
       <div class="vr sel"><span class="tw">▾</span><span class="fl">src/lang/python</span><span class="ct">1 / 4</span></div>
-      <div class="vr ind"><span class="sd" style="background:#f2c12e"></span><span class="un">resolve_bindings</span><span class="badge" style="color:#f2c12e">STALE</span></div>
+      <div class="vr ind"><span class="sd" style="background:#e6b23e"></span><span class="un">resolve_bindings</span><span class="badge" style="color:#e6b23e">STALE</span></div>
       <div class="vr"><span class="tw">▸</span><span class="fl">src/lang/rust</span><span class="ct">0 / 6</span></div>
     </div>
     <div class="ed">
       <div class="tabs"><span class="tab">scope.rs <span class="x">×</span></span></div>
       <div class="code">
-        <div class="cl"><span class="ln"></span><span class="gut"></span><span class="codelens"><span style="color:#f2c12e">●</span> stale · alpha-normalized body changed since review — <span class="vouch">✓ Vouch</span>  <span class="lk">⋯ details</span></span></div>
-        <div class="cl"><span class="ln">42</span><span class="gut" style="background:#f2c12e"></span><span class="src"><span class="kw">pub fn</span> <span class="fn">resolve_bindings</span>(node: &amp;<span class="ty">Node</span>, scope: &amp;<span class="kw">mut</span> <span class="ty">Scope</span>) -&gt; <span class="ty">Bindings</span> {</span></div>
-        <div class="cl"><span class="ln">43</span><span class="gut" style="background:#f2c12e"></span><span class="src">    <span class="kw">let mut</span> out = <span class="ty">Bindings</span>::new();</span></div>
-        <div class="cl"><span class="ln">44</span><span class="gut" style="background:#f2c12e"></span><span class="src">    <span class="kw">for</span> child <span class="kw">in</span> node.named_children() {</span></div>
-        <div class="cl"><span class="ln">45</span><span class="gut" style="background:#f2c12e"></span><span class="src">        <span class="kw">if</span> child.is_definition() {</span></div>
-        <div class="cl"><span class="ln">46</span><span class="gut" style="background:#f2c12e"></span><span class="src">            scope.bind(child.name(), child.kind());</span></div>
-        <div class="cl"><span class="ln">47</span><span class="gut" style="background:#f2c12e"></span><span class="src">        }</span></div>
-        <div class="cl"><span class="ln">48</span><span class="gut" style="background:#f2c12e"></span><span class="src">    }</span></div>
-        <div class="cl"><span class="ln">49</span><span class="gut" style="background:#f2c12e"></span><span class="src">    out</span></div>
-        <div class="cl"><span class="ln">50</span><span class="gut" style="background:#f2c12e"></span><span class="src">}</span></div>
+        <div class="cl"><span class="ln"></span><span class="gut"></span><span class="codelens"><span style="color:#e6b23e">●</span> stale · alpha-normalized body changed since review — <span class="vouch">✓ Vouch</span>  <span class="lk">⋯ details</span></span></div>
+        <div class="cl"><span class="ln">42</span><span class="gut" style="background:#e6b23e"></span><span class="src"><span class="kw">pub fn</span> <span class="fn">resolve_bindings</span>(node: &amp;<span class="ty">Node</span>, scope: &amp;<span class="kw">mut</span> <span class="ty">Scope</span>) -&gt; <span class="ty">Bindings</span> {</span></div>
+        <div class="cl"><span class="ln">43</span><span class="gut" style="background:#e6b23e"></span><span class="src">    <span class="kw">let mut</span> out = <span class="ty">Bindings</span>::new();</span></div>
+        <div class="cl"><span class="ln">44</span><span class="gut" style="background:#e6b23e"></span><span class="src">    <span class="kw">for</span> child <span class="kw">in</span> node.named_children() {</span></div>
+        <div class="cl"><span class="ln">45</span><span class="gut" style="background:#e6b23e"></span><span class="src">        <span class="kw">if</span> child.is_definition() {</span></div>
+        <div class="cl"><span class="ln">46</span><span class="gut" style="background:#e6b23e"></span><span class="src">            scope.bind(child.name(), child.kind());</span></div>
+        <div class="cl"><span class="ln">47</span><span class="gut" style="background:#e6b23e"></span><span class="src">        }</span></div>
+        <div class="cl"><span class="ln">48</span><span class="gut" style="background:#e6b23e"></span><span class="src">    }</span></div>
+        <div class="cl"><span class="ln">49</span><span class="gut" style="background:#e6b23e"></span><span class="src">    out</span></div>
+        <div class="cl"><span class="ln">50</span><span class="gut" style="background:#e6b23e"></span><span class="src">}</span></div>
         <div class="cl"><span class="ln">51</span><span class="gut"></span><span class="src"></span></div>
-        <div class="cl"><span class="ln"></span><span class="gut"></span><span class="codelens"><span style="color:#18bf8e">●</span> reviewed · tom@vidivouch.com (senior) · equivalent  <span class="lk">⋯ details</span></span></div>
-        <div class="cl"><span class="ln">52</span><span class="gut" style="background:#18bf8e"></span><span class="src"><span class="kw">fn</span> <span class="fn">free_names</span>(node: &amp;<span class="ty">Node</span>) -&gt; <span class="ty">Vec</span>&lt;<span class="ty">Name</span>&gt; {</span></div>
-        <div class="cl"><span class="ln">53</span><span class="gut" style="background:#18bf8e"></span><span class="src">    node.idents().filter(|i| !i.is_bound()).collect()</span></div>
-        <div class="cl"><span class="ln">54</span><span class="gut" style="background:#18bf8e"></span><span class="src">}</span></div>
+        <div class="cl"><span class="ln"></span><span class="gut"></span><span class="codelens"><span style="color:#25b59c">●</span> reviewed · tom@vidivouch.com (senior) · equivalent  <span class="lk">⋯ details</span></span></div>
+        <div class="cl"><span class="ln">52</span><span class="gut" style="background:#25b59c"></span><span class="src"><span class="kw">fn</span> <span class="fn">free_names</span>(node: &amp;<span class="ty">Node</span>) -&gt; <span class="ty">Vec</span>&lt;<span class="ty">Name</span>&gt; {</span></div>
+        <div class="cl"><span class="ln">53</span><span class="gut" style="background:#25b59c"></span><span class="src">    node.idents().filter(|i| !i.is_bound()).collect()</span></div>
+        <div class="cl"><span class="ln">54</span><span class="gut" style="background:#25b59c"></span><span class="src">}</span></div>
       </div>
     </div>
   </div>
@@ -556,11 +556,11 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
   <div class="b2">
     <div class="grp">
       <div class="gh">Appearance · review states <span class="tagm local">local · live</span></div>
-      <div class="crow"><span class="sw" style="background:#18bf8e"></span><span class="clabel">reviewed</span><span class="hex">#5FB86A</span></div>
-      <div class="crow"><span class="sw" style="background:#f2c12e"></span><span class="clabel">stale</span><span class="hex">#f2c12e</span></div>
-      <div class="crow"><span class="sw" style="background:#fb5570"></span><span class="clabel">unreviewed</span><span class="hex">#E06C75</span></div>
-      <div class="crow"><span class="sw" style="background:#5a6376"></span><span class="clabel">orphan</span><span class="hex">#5a6376</span></div>
-      <div class="crow"><span class="clabel" style="width:92px;color:#8a8f98;font-size:11px">severity</span><span class="sw" style="background:#b3a93f"></span><span class="hex">minor</span><span class="sw" style="background:#f2c12e"></span><span class="hex">major</span></div>
+      <div class="crow"><span class="sw" style="background:#25b59c"></span><span class="clabel">reviewed</span><span class="hex">#25B59C</span></div>
+      <div class="crow"><span class="sw" style="background:#e6b23e"></span><span class="clabel">stale</span><span class="hex">#E6B23E</span></div>
+      <div class="crow"><span class="sw" style="background:#8a9bb0"></span><span class="clabel">unreviewed</span><span class="hex">#8A9BB0</span></div>
+      <div class="crow"><span class="sw" style="background:#ef6f86"></span><span class="clabel">orphan</span><span class="hex">#EF6F86</span></div>
+      <div class="crow"><span class="clabel" style="width:92px;color:#8a8f98;font-size:11px">severity</span><span class="sw" style="background:#e6b23e"></span><span class="hex">minor</span><span class="sw" style="background:#ef6f86"></span><span class="hex">major</span></div>
       <div class="note">Stored per-editor. Project defaults live in <span class="mono">.vid/config</span> (committed); your edits override locally.</div>
     </div>
     <div class="grp">
@@ -599,7 +599,7 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
   <div style="text-align:center">
     <div style="font:600 12px var(--mono,monospace);color:var(--muted);margin-bottom:4px">src/billing/** — <span style="color:var(--ink)">human=principal AND machine=opus</span> → a corner</div>
     <svg viewBox="0 0 300 262" width="300" height="262" font-family="ui-monospace,monospace" role="img" aria-label="Billing coverage matrix: pass region is the top-right corner">
-      <rect x="230" y="12" width="56" height="56" fill="#18bf8e" fill-opacity="0.18"/>
+      <rect x="230" y="12" width="56" height="56" fill="#25b59c" fill-opacity="0.18"/>
       <g stroke="#e6e8ec" stroke-width="1">
         <line x1="62" y1="12" x2="286" y2="12"/><line x1="62" y1="68" x2="286" y2="68"/>
         <line x1="62" y1="124" x2="286" y2="124"/><line x1="62" y1="180" x2="286" y2="180"/>
@@ -608,14 +608,14 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
         <line x1="174" y1="12" x2="174" y2="236"/><line x1="230" y1="12" x2="230" y2="236"/>
         <line x1="286" y1="12" x2="286" y2="236"/>
       </g>
-      <polyline points="230,68 230,12 286,12 286,68 230,68" fill="none" stroke="#18bf8e" stroke-width="2.5"/>
-      <text x="258" y="60" text-anchor="middle" font-size="9" fill="#18bf8e">the&#160;bar</text>
+      <polyline points="230,68 230,12 286,12 286,68 230,68" fill="none" stroke="#25b59c" stroke-width="2.5"/>
+      <text x="258" y="60" text-anchor="middle" font-size="9" fill="#25b59c">the&#160;bar</text>
       <g>
-        <circle cx="250" cy="34" r="4" fill="#18bf8e"/><circle cx="266" cy="35" r="4" fill="#18bf8e"/><circle cx="258" cy="48" r="4" fill="#18bf8e"/>
-        <circle cx="84" cy="148" r="4" fill="#f2c12e"/><circle cx="96" cy="156" r="4" fill="#f2c12e"/>
-        <circle cx="90" cy="208" r="4" fill="#fb5570"/>
-        <circle cx="197" cy="204" r="4" fill="#fb5570"/><circle cx="208" cy="212" r="4" fill="#fb5570"/>
-        <circle cx="258" cy="96" r="4" fill="#f2c12e"/>
+        <circle cx="250" cy="34" r="4" fill="#25b59c"/><circle cx="266" cy="35" r="4" fill="#25b59c"/><circle cx="258" cy="48" r="4" fill="#25b59c"/>
+        <circle cx="84" cy="148" r="4" fill="#e6b23e"/><circle cx="96" cy="156" r="4" fill="#e6b23e"/>
+        <circle cx="90" cy="208" r="4" fill="#ef6f86"/>
+        <circle cx="197" cy="204" r="4" fill="#ef6f86"/><circle cx="208" cy="212" r="4" fill="#ef6f86"/>
+        <circle cx="258" cy="96" r="4" fill="#e6b23e"/>
       </g>
       <g fill="#5c6066" font-size="10">
         <text x="56" y="43" text-anchor="end">principal</text><text x="56" y="99" text-anchor="end">senior</text>
@@ -628,8 +628,8 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
   <div style="text-align:center">
     <div style="font:600 12px var(--mono,monospace);color:var(--muted);margin-bottom:4px">src/dashboards/** — <span style="color:var(--ink)">human=senior OR machine=opus</span> → an L</div>
     <svg viewBox="0 0 300 262" width="300" height="262" font-family="ui-monospace,monospace" role="img" aria-label="Dashboards coverage matrix: pass region is an L (top rows or right column)">
-      <rect x="62" y="12" width="224" height="112" fill="#18bf8e" fill-opacity="0.18"/>
-      <rect x="230" y="124" width="56" height="112" fill="#18bf8e" fill-opacity="0.18"/>
+      <rect x="62" y="12" width="224" height="112" fill="#25b59c" fill-opacity="0.18"/>
+      <rect x="230" y="124" width="56" height="112" fill="#25b59c" fill-opacity="0.18"/>
       <g stroke="#e6e8ec" stroke-width="1">
         <line x1="62" y1="12" x2="286" y2="12"/><line x1="62" y1="68" x2="286" y2="68"/>
         <line x1="62" y1="124" x2="286" y2="124"/><line x1="62" y1="180" x2="286" y2="180"/>
@@ -638,12 +638,12 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
         <line x1="174" y1="12" x2="174" y2="236"/><line x1="230" y1="12" x2="230" y2="236"/>
         <line x1="286" y1="12" x2="286" y2="236"/>
       </g>
-      <polyline points="62,124 230,124 230,236" fill="none" stroke="#18bf8e" stroke-width="2.5"/>
+      <polyline points="62,124 230,124 230,236" fill="none" stroke="#25b59c" stroke-width="2.5"/>
       <g>
-        <circle cx="202" cy="34" r="4" fill="#18bf8e"/><circle cx="90" cy="96" r="4" fill="#18bf8e"/>
-        <circle cx="258" cy="208" r="4" fill="#18bf8e"/><circle cx="150" cy="40" r="4" fill="#18bf8e"/>
-        <circle cx="86" cy="150" r="4" fill="#f2c12e"/><circle cx="150" cy="208" r="4" fill="#fb5570"/>
-        <circle cx="200" cy="152" r="4" fill="#f2c12e"/>
+        <circle cx="202" cy="34" r="4" fill="#25b59c"/><circle cx="90" cy="96" r="4" fill="#25b59c"/>
+        <circle cx="258" cy="208" r="4" fill="#25b59c"/><circle cx="150" cy="40" r="4" fill="#25b59c"/>
+        <circle cx="86" cy="150" r="4" fill="#e6b23e"/><circle cx="150" cy="208" r="4" fill="#ef6f86"/>
+        <circle cx="200" cy="152" r="4" fill="#e6b23e"/>
       </g>
       <g fill="#5c6066" font-size="10">
         <text x="56" y="43" text-anchor="end">principal</text><text x="56" y="99" text-anchor="end">senior</text>
@@ -654,7 +654,7 @@ major = 0.25                      # advisory only — minor &lt; 25% changed · 
     </svg>
   </div>
 </div>
-<figcaption><strong>Web (<code>vici</code>) — the reference rendering.</strong> Units are points at their strongest <code>(human, machine)</code>; the shaded region is "passes," its frontier drawn from the <code>accept</code> rows — so the policy's <em>shape</em> is literally visible (<code>AND</code> = a corner, <code>OR</code> = an L). <span style="color:#18bf8e">green</span> = in the region, <span style="color:#f2c12e">amber</span>/<span style="color:#fb5570">red</span> = below the bar (hue = how far). Live: hover a point → unit + its gap; click a cell → its units &amp; vouch history; a <strong>time-scrubber</strong> replays the matrix commit-by-commit (watch the below-bar mass burn down); per-PR overlays the changed units; an org view is small-multiples of this grid per repo, plus an embeddable matrix badge.</figcaption>
+<figcaption><strong>Web (<code>vici</code>) — the reference rendering.</strong> Units are points at their strongest <code>(human, machine)</code>; the shaded region is "passes," its frontier drawn from the <code>accept</code> rows — so the policy's <em>shape</em> is literally visible (<code>AND</code> = a corner, <code>OR</code> = an L). <span style="color:#25b59c">green</span> = in the region, <span style="color:#e6b23e">amber</span>/<span style="color:#ef6f86">red</span> = below the bar (hue = how far). Live: hover a point → unit + its gap; click a cell → its units &amp; vouch history; a <strong>time-scrubber</strong> replays the matrix commit-by-commit (watch the below-bar mass burn down); per-PR overlays the changed units; an org view is small-multiples of this grid per repo, plus an embeddable matrix badge.</figcaption>
 </figure>
 
 <figure class="mock-fig">

@@ -21,15 +21,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
   :root{
-    /* ---- Spectral Provenance — the canonical brand tokens (theme.css) ------ */
-    --iris:#6e6bf2; --iris-bright:#8f8bff; --iris-deep:#4b46c9;
-    --cyan:#2dd4cf; --cyan-deep:#14a5a0; --violet:#b06cf5;
-    --spectral:linear-gradient(100deg,var(--iris) 0%,var(--cyan) 55%,var(--violet) 110%);
+    /* ---- Cyanotype — the canonical brand tokens (theme.css) ---------------- */
+    --iris:#2f9fd8; --iris-bright:#5cc8f5; --iris-deep:#1f6fb8;
+    --cyan:#76cdec; --cyan-deep:#1c6f9f; --violet:#1f6fb8; /* no violet — folded to deep Prussian */
+    --spectral:linear-gradient(100deg,var(--iris-deep) 0%,var(--iris) 52%,var(--cyan) 110%);
 
     /* status ramp (cooled traffic system; the only warm hue is the amber STALE) */
-    --st-reviewed:#18bf8e; --st-under:#6f8be0; --st-stale:#f2c12e;
-    --st-migration:#9a7af0; --st-exempt:#5d6781; --st-unreviewed:#5a6376;
-    --st-orphan:#fb5570; --sev-minor:#c9a94e; --sev-major:#fb5570;
+    --st-reviewed:#25b59c; --st-under:#2f9fd8; --st-stale:#e6b23e;
+    --st-migration:#88a8cb; --st-exempt:#5b7488; --st-unreviewed:#8a9bb0;
+    --st-orphan:#ef6f86; --sev-minor:#e6b23e; --sev-major:#ef6f86;
     --machine:var(--cyan);
 
     /* cool indigo-graphite canvas (the default dark instrument) */
@@ -251,13 +251,13 @@
       <svg class="sigil" viewBox="0 0 48 48" fill="none" role="img" aria-label="Vidi Vouch — Vouch Sigil">
         <defs>
           <linearGradient id="vv-spectral" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#6e6bf2"/><stop offset="55%" stop-color="#2dd4cf"/><stop offset="100%" stop-color="#b06cf5"/>
+            <stop offset="0%" stop-color="#2f9fd8"/><stop offset="55%" stop-color="#76cdec"/><stop offset="100%" stop-color="#1f6fb8"/>
           </linearGradient>
         </defs>
-        <circle cx="24" cy="24" r="19" stroke="#6e6bf2" stroke-opacity=".18" stroke-width="2.4"/>
+        <circle cx="24" cy="24" r="19" stroke="#2f9fd8" stroke-opacity=".18" stroke-width="2.4"/>
         <circle cx="24" cy="24" r="19" stroke="url(#vv-spectral)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="90.7 28.7" transform="rotate(-90 24 24)"/>
-        <circle cx="24" cy="24" r="12.4" stroke="#8f8bff" stroke-width="3.4"/>
-        <circle cx="28.4" cy="28.4" r="4.1" fill="#2dd4cf"/>
+        <circle cx="24" cy="24" r="12.4" stroke="#5cc8f5" stroke-width="3.4"/>
+        <circle cx="28.4" cy="28.4" r="4.1" fill="#76cdec"/>
       </svg>
       Vidi&nbsp;Vouch
     </span>
@@ -269,13 +269,13 @@
     <svg class="mark" viewBox="0 0 48 48" fill="none" role="img" aria-label="Vidi Vouch — Vouch Sigil">
       <defs>
         <linearGradient id="vv-spectral-2" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#6e6bf2"/><stop offset="55%" stop-color="#2dd4cf"/><stop offset="100%" stop-color="#b06cf5"/>
+          <stop offset="0%" stop-color="#2f9fd8"/><stop offset="55%" stop-color="#76cdec"/><stop offset="100%" stop-color="#1f6fb8"/>
         </linearGradient>
       </defs>
-      <circle cx="24" cy="24" r="19" stroke="#6e6bf2" stroke-opacity=".2" stroke-width="2.4"/>
+      <circle cx="24" cy="24" r="19" stroke="#2f9fd8" stroke-opacity=".2" stroke-width="2.4"/>
       <circle cx="24" cy="24" r="19" stroke="url(#vv-spectral-2)" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="90.7 28.7" transform="rotate(-90 24 24)"/>
-      <circle cx="24" cy="24" r="12.4" stroke="#8f8bff" stroke-width="3.6"/>
-      <circle cx="28.4" cy="28.4" r="4.2" fill="#2dd4cf"/>
+      <circle cx="24" cy="24" r="12.4" stroke="#5cc8f5" stroke-width="3.6"/>
+      <circle cx="28.4" cy="28.4" r="4.2" fill="#76cdec"/>
     </svg>
     <p class="tagline">I saw. I vouch.</p>
     <p class="eyebrow eyebrow--accent">Code-review provenance · CLI</p>
@@ -294,7 +294,7 @@
 
   <div class="ide">
     <div class="tbar">
-      <span class="tl"><i style="background:#fb5570"></i><i style="background:#f2c12e"></i><i style="background:#18bf8e"></i></span>
+      <span class="tl"><i style="background:#ef6f86"></i><i style="background:#e6b23e"></i><i style="background:#25b59c"></i></span>
       <span class="file">vid &nbsp;›&nbsp; src/lang/python/<b>scope.rs</b></span>
       <span class="spacer"></span>
       <span class="vouch-pill">✓ Vouch&nbsp; <span class="key">⌃⌥V</span></span>
@@ -357,7 +357,7 @@
       </div>
       <figure class="report" style="margin:0">
         <figcaption class="cap">
-          <span class="dotrow"><i style="background:#fb5570"></i><i style="background:#f2c12e"></i><i style="background:#18bf8e"></i></span>
+          <span class="dotrow"><i style="background:#ef6f86"></i><i style="background:#e6b23e"></i><i style="background:#25b59c"></i></span>
           <span>vid&nbsp;report</span>
         </figcaption>
         <div class="body">
@@ -472,12 +472,12 @@ accept = [{ human = <span class="s">"intern"</span> }, { machine = <span class="
         <figcaption class="cap">Pull request #142 · checks</figcaption>
         <div class="body">
           <div class="check">
-            <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="#18bf8e" stroke-width="1.6"/><path d="M5 8.2 7 10.2 11 5.6" fill="none" stroke="#18bf8e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="#25b59c" stroke-width="1.6"/><path d="M5 8.2 7 10.2 11 5.6" fill="none" stroke="#25b59c" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="nm">vid / verify <span class="dim">— Required</span></span>
             <span class="res ok">0 orphan · 0 stale · 0 requirement</span>
           </div>
           <div class="check">
-            <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="#6e6bf2" stroke-width="1.6"/><path d="M8 4.6v4.2M8 11.1h.01" fill="none" stroke="#6e6bf2" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="#2f9fd8" stroke-width="1.6"/><path d="M8 4.6v4.2M8 11.1h.01" fill="none" stroke="#2f9fd8" stroke-width="1.6" stroke-linecap="round"/></svg>
             <span class="nm">vid / vouch <span class="dim">— @alice vouched refund() at head SHA</span></span>
             <span class="res">commitless · no diff change</span>
           </div>
